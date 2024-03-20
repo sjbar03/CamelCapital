@@ -1,2 +1,3 @@
 .env
 intraday_data.csv
+*.csv

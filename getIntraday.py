@@ -26,5 +26,3 @@ data.index.names = ['date', 'ticker']
 data.columns = data.columns.str.lower()
 #we can then export this data as a csv which we can use in ocaml analagous to a3
 data.to_csv("intraday_data.csv") 
-
-
