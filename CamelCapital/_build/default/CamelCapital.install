@@ -1,0 +1,8 @@
+lib: [
+  "_build/install/default/lib/CamelCapital/META"
+  "_build/install/default/lib/CamelCapital/dune-package"
+  "_build/install/default/lib/CamelCapital/opam"
+]
+bin: [
+  "_build/install/default/bin/CamelCapital"
+]
