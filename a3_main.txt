@@ -1,0 +1,53 @@
+open A3.Dataframe
+(** @author Jephthah Mensah(jkm255) *)
+
+let () =
+  let () = print_endline "WELCOME TO A3" in
+  let () =
+    print_endline
+      "!! NOTE: THE ORDER OF THE COLUMNS ARE NOT ALWAYS MAINTAINED WHEN \
+       PRINTING OUT TABLE BECAUSE THEY ARE NOT INDEXED!!"
+  in
+  print_newline ()
+
+let df = dataframe_from_csv "mycsv.csv"
+let () = print_string "DATAFRAME LOADED"
+let () = print_newline ()
+let () = print_string "PRINTING FIRST 100 LINES OF DATAFRAME "
+let () = print_newline ()
+let () = print_newline ()
+let () = print_dataframe df 100 false
+let () = print_newline ()
+let f data = string_of_int (100 + int_data data 0)
+let df = map_dataframe f "Model Year" df
+let () = print_string "ADDED 100 TO EACH DATA IN THE `Model Year` COLUMN"
+let () = print_newline ()
+let () = print_string "PRINTING FIRST 100 LINES OF DATAFRAME "
+let () = print_newline ()
+
+let () =
+  print_string "Check `Model Year` column at one of the tips of the table "
+
+let () = print_newline ()
+let () = print_newline ()
+let () = print_dataframe df 100 false
+let () = print_newline ()
+let f acc data = string_of_int (int_data acc 0 + int_data data 0)
+let table = reduce_dataframe f "0" "Model Year" df
+let () = print_string "ADDED ALL DATA IN `Model Year` COLUMN"
+let () = print_newline ()
+let () = print_table table
+let () = print_newline ()
+let f data = int_data data 0 = 2111
+let df = filter_dataframe f "Model Year" df
+
+let () =
+  print_string
+    "FILTERED `Model Year` COLUMN TO GET RECORDS WITH `Model Year` equal to \
+     2111"
+
+let () = print_newline ()
+let () = print_string "PRINTING FIRST 100 LINES OF DATAFRAME "
+let () = print_newline ()
+let () = print_dataframe df 100 false
+let () = print_newline ()
