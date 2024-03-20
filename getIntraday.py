@@ -8,8 +8,8 @@ sp500 = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
 # t = yf.Tickers['(ticker names we want')]
 
 #change start/end to whatever range we want, here I just used 8 years from today.
-start = '2016-28-24'
-end = '2024-28-24'
+start = '2016-02-24'  
+end = '2024-02-24'  
 
 #'Symbol is the name the wiki file uses for tickers so we have to access them using that key, then we just want to clean the ticker names. 
 #For instance, some tickers use dots in wiki but yfinance uses dashes so we need to convert tickers to be yf complient 
