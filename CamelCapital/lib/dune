@@ -1,6 +1,0 @@
-(library
- (inline_tests)
- (name CamelCapital)
- (libraries csv)
- (preprocess
-  (pps ppx_inline_test)))

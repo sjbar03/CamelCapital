@@ -1,4 +1,0 @@
-(executable
- (public_name CamelCapital)
- (name main)
- (libraries CamelCapital))
