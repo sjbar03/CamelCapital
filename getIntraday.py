@@ -21,6 +21,8 @@ sp500_tickers = sp500['Symbol'].unique().tolist()
 data = yf.download(tickers= sp500_tickers, start=start, end=end).stack()
 #yf will give us, for each day in our period, adj close (adjusted closing price), closing price, high, low, open(starting price), and volume(number of shares traded)
 # this just gives a name to the two "exogenous" columns we gave as input to create data, our date(which is every day in our timeframe) and ticker names
+print("\n\n")
+print(data)
 data.index.names = ['date', 'ticker']
 #and then I'm just setting all those column headers to lower case so they're easier to reference
 data.columns = data.columns.str.lower()
