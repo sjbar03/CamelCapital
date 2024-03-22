@@ -1,0 +1,25 @@
+# dune exec bin/main.exe -- apple_stock_data.csv
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /Users/amaanrehan/.cache/dune/db
+# Workspace root: /Users/amaanrehan/Documents/trading_bot
+# Auto-detected concurrency: 8
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; installed_env =
+#      map
+#        { "INSIDE_DUNE" :
+#            "/Users/amaanrehan/Documents/trading_bot/_build/default"
+#        ; "OCAML_COLOR" : "always"
+#        ; "OPAMCOLOR" : "always"
+#        }
+#  ; instrument_with = []
+#  }
+$ /Users/amaanrehan/.opam/cs3110-2024sp/bin/ocamlc.opt -config > /var/folders/lm/2w6zqsqn6y5chqwf3cd1wnsc0000gn/T/dune_296233_output
+$ (cd _build/default && /Users/amaanrehan/.opam/cs3110-2024sp/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -69 -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/batteries -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/batteries/unthreaded -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/camlp-streams -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/num -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/ocaml/str -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/ocaml/threads -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/ocaml/unix -I lib/.trading_bot.objs/byte -I lib/.trading_bot.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
+$ (cd _build/default && /Users/amaanrehan/.opam/cs3110-2024sp/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -69 -g -o bin/main.exe lib/trading_bot.cmxa /Users/amaanrehan/.opam/cs3110-2024sp/lib/num/nums.cmxa -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/num -I /Users/amaanrehan/.opam/cs3110-2024sp/lib/num /Users/amaanrehan/.opam/cs3110-2024sp/lib/ocaml/str/str.cmxa /Users/amaanrehan/.opam/cs3110-2024sp/lib/camlp-streams/camlp_streams.cmxa /Users/amaanrehan/.opam/cs3110-2024sp/lib/ocaml/unix/unix.cmxa /Users/amaanrehan/.opam/cs3110-2024sp/lib/batteries/unthreaded/batteries_unthreaded.cmxa /Users/amaanrehan/.opam/cs3110-2024sp/lib/ocaml/threads/threads.cmxa /Users/amaanrehan/.opam/cs3110-2024sp/lib/batteries/batteries.cmxa bin/.main.eobjs/native/dune__exe__Main.cmx)
