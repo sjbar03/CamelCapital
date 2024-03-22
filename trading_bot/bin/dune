@@ -1,5 +1,0 @@
-(executable
- (public_name trading_bot)
- (name main)
- (libraries trading_bot batteries)
- (flags :standard -w -69))
