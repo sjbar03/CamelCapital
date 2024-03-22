@@ -1,0 +1,6 @@
+(library
+ (inline_tests)
+ (name CC)
+ (libraries csv)
+ (preprocess
+  (pps ppx_inline_test)))
