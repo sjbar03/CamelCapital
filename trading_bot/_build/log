@@ -1,10 +1,9 @@
-# dune build
+# dune exec bin/main.exe -- ticker NVDA 200000
 # OCAMLPARAM: unset
 # Shared cache: disabled
-# Shared cache location: /Users/stephenbarlett/.cache/dune/db
-# Workspace root: "/Users/stephenbarlett/Desktop/CS
-# 3110/FinalProj/CamelCapital/trading_bot"
-# Auto-detected concurrency: 10
+# Shared cache location: /Users/amaanrehan/.cache/dune/db
+# Workspace root: /Users/amaanrehan/Documents/trading_bot
+# Auto-detected concurrency: 8
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -15,10 +14,10 @@
 #  ; installed_env =
 #      map
 #        { "INSIDE_DUNE" :
-#            "/Users/stephenbarlett/Desktop/CS 3110/FinalProj/CamelCapital/trading_bot/_build/default"
+#            "/Users/amaanrehan/Documents/trading_bot/_build/default"
 #        ; "OCAML_COLOR" : "always"
 #        ; "OPAMCOLOR" : "always"
 #        }
 #  ; instrument_with = []
 #  }
-$ /Users/stephenbarlett/.opam/cs3110-2024sp/bin/ocamlc.opt -config > /var/folders/fr/kvd73ywj4zx4f97m1s70l2hc0000gn/T/dune_c28651_output
+$ /Users/amaanrehan/.opam/cs3110-2024sp/bin/ocamlc.opt -config > /var/folders/lm/2w6zqsqn6y5chqwf3cd1wnsc0000gn/T/dune_a13e4b_output

@@ -1,3 +1,20 @@
+(*
+The program accepts 4 inputs
+
+1) Running the Algorithm on an Existing CSV File Without Specifying Starting Balance (Default is $100000)
+dune exec bin/main.exe -- csv apple_stock_data.csv
+
+2) Running the Algorithm on an Existing CSV File With Specified Starting Balance
+dune exec bin/main.exe -- csv apple_stock_data.csv 200000
+
+3) Downloading Stock Data for a Given Ticker and Running the Algorithm Without Specifying Starting Balance
+dune exec bin/main.exe -- ticker AAPL
+
+4) Downloading Stock Data for a Given Ticker and Running the Algorithm With Specified Starting Balance
+dune exec bin/main.exe -- ticker AAPL 200000
+
+*)
+
 open Batteries
 open Printf
 
@@ -93,12 +110,44 @@ let trading_algorithm file_name =
   in
   execute_trading_strategy tr_data 75. 0.7
 
-(* Entry Point *)
+(* Function to call the Python script for downloading data *)
+let download_data ticker =
+  let command = Printf.sprintf "python download_data.py %s" ticker in
+  match Sys.command command with
+  | 0 -> Printf.printf "Downloaded data for %s\n" ticker
+  | _ -> failwith "Failed to download data"
+
+(* Modify the entry point to handle stock ticker and an optional starting balance *)
 let () =
-  let starting_balance = 100000.0 (* Example starting balance *) in
+  let default_starting_balance = 100000.0 in
+  (* Default starting balance *)
   let argv = Array.to_list Sys.argv in
   match argv with
-  | _ :: file_name :: _ -> trading_algorithm file_name starting_balance
+  | _ :: "csv" :: file_name :: balance_arg ->
+      let starting_balance =
+        match balance_arg with
+        | [] ->
+            default_starting_balance
+            (* Use default if no balance is specified *)
+        | balance_str :: _ ->
+            float_of_string balance_str (* Convert specified balance to float *)
+      in
+      trading_algorithm file_name starting_balance
+  | _ :: "ticker" :: ticker :: balance_arg ->
+      download_data ticker;
+      (* Call Python script to download data *)
+      let csv_file = "stock_data.csv" in
+      (* Updated to use the fixed output file name from the Python script *)
+      let starting_balance =
+        match balance_arg with
+        | [] ->
+            default_starting_balance
+            (* Use default if no balance is specified *)
+        | balance_str :: _ ->
+            float_of_string balance_str (* Convert specified balance to float *)
+      in
+      trading_algorithm csv_file starting_balance
   | _ ->
-      Printf.eprintf "Usage: %s <csv_file_path> <starting_balance>\n"
+      Printf.eprintf
+        "Usage: %s <csv|ticker> <file_path|ticker_symbol> [starting_balance]\n"
         (List.hd argv)
