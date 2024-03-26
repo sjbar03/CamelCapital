@@ -30,6 +30,8 @@ let parse_stock_data line =
       }
   | _ -> failwith (Printf.sprintf "Incorrect CSV format for line: %s" line)
 
+let update_prev_close stock_data prev_close = { stock_data with prev_close }
+
 let true_range sd =
   List.fold_left max (sd.high -. sd.low)
     [ sd.high -. sd.prev_close; sd.prev_close -. sd.low ]
@@ -40,3 +42,18 @@ let moving_percentile tr_list percentile =
     int_of_float (float_of_int (List.length sorted_list) *. percentile /. 100.)
   in
   List.nth sorted_list index
+
+let determine_buy tr_75th_percentile buy_signal_multiplier (prev_close, balance)
+    (stock, _tr) =
+  let buy_price =
+    stock.close -. (tr_75th_percentile *. buy_signal_multiplier)
+  in
+  if stock.low <= buy_price && prev_close < buy_price then
+    (stock.close, balance -. buy_price)
+  else (stock.close, balance)
+
+let calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
+    tr_data =
+  List.fold_left
+    (determine_buy tr_75th_percentile buy_signal_multiplier)
+    (0.0, starting_balance) tr_data
