@@ -1,0 +1,29 @@
+# dune build
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /Users/stephenbarlett/.cache/dune/db
+# Workspace root: "/Users/stephenbarlett/Desktop/CS
+# 3110/FinalProj/CamelCapital/trading_bot"
+# Auto-detected concurrency: 10
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; installed_env =
+#      map
+#        { "INSIDE_DUNE" :
+#            "/Users/stephenbarlett/Desktop/CS 3110/FinalProj/CamelCapital/trading_bot/_build/default"
+#        ; "OCAML_COLOR" : "always"
+#        ; "OPAMCOLOR" : "always"
+#        }
+#  ; instrument_with = []
+#  }
+$ /Users/stephenbarlett/.opam/cs3110-2024sp/bin/ocamlc.opt -config > /var/folders/fr/kvd73ywj4zx4f97m1s70l2hc0000gn/T/dune_973512_output
+$ (cd _build/default && /Users/stephenbarlett/.opam/cs3110-2024sp/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/trading_bot.cmxa lib/.trading_bot.objs/native/trading_bot.cmx)
+$ (cd _build/default && /Users/stephenbarlett/.opam/cs3110-2024sp/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -69 -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/batteries -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/batteries/unthreaded -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/camlp-streams -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/num -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/ocaml/str -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/ocaml/threads -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/ocaml/unix -I lib/.trading_bot.objs/byte -I lib/.trading_bot.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
+$ (cd _build/default && /Users/stephenbarlett/.opam/cs3110-2024sp/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I lib -o lib/trading_bot.cmxs lib/trading_bot.cmxa)
+$ (cd _build/default && /Users/stephenbarlett/.opam/cs3110-2024sp/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o test/test_trading_bot.exe test/.test_trading_bot.eobjs/native/dune__exe__Test_trading_bot.cmx)
+$ (cd _build/default && /Users/stephenbarlett/.opam/cs3110-2024sp/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -69 -g -o bin/main.exe lib/trading_bot.cmxa /Users/stephenbarlett/.opam/cs3110-2024sp/lib/num/nums.cmxa -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/num -I /Users/stephenbarlett/.opam/cs3110-2024sp/lib/num /Users/stephenbarlett/.opam/cs3110-2024sp/lib/ocaml/str/str.cmxa /Users/stephenbarlett/.opam/cs3110-2024sp/lib/camlp-streams/camlp_streams.cmxa /Users/stephenbarlett/.opam/cs3110-2024sp/lib/ocaml/unix/unix.cmxa /Users/stephenbarlett/.opam/cs3110-2024sp/lib/batteries/unthreaded/batteries_unthreaded.cmxa /Users/stephenbarlett/.opam/cs3110-2024sp/lib/ocaml/threads/threads.cmxa /Users/stephenbarlett/.opam/cs3110-2024sp/lib/batteries/batteries.cmxa bin/.main.eobjs/native/dune__exe__Main.cmx)
