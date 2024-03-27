@@ -32,4 +32,5 @@ val moving_percentile : float list -> float -> float
 val calc_final_bal : float -> float -> float -> (t * 'a) list -> float * float
 (** [calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance tr_data]
     is the final balance accumulated after considering each day of stock data
-    and determining whether or not to buy. *)
+    and determining whether or not to buy. If a stock is bought, it sells
+    according to next morning's opening price. *)

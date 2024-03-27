@@ -43,17 +43,29 @@ let moving_percentile tr_list percentile =
   in
   List.nth sorted_list index
 
-let determine_buy tr_75th_percentile buy_signal_multiplier (prev_close, balance)
-    (stock, _tr) =
+(* Add a new parameter to carry the number of shares bought *)
+let determine_buy_sell tr_75th_percentile buy_signal_multiplier
+    (prev_close, balance, shares_bought) (stock, _tr) =
   let buy_price =
     stock.close -. (tr_75th_percentile *. buy_signal_multiplier)
   in
   if stock.low <= buy_price && prev_close < buy_price then
-    (stock.close, balance -. buy_price)
-  else (stock.close, balance)
+    let shares_to_buy = balance *. 0.15 /. buy_price in
+    (* Assuming 15% of balance is used for buying *)
+    ( stock.close,
+      balance -. (shares_to_buy *. buy_price),
+      shares_bought +. shares_to_buy )
+  else
+    (* Sell all shares at the opening price of the current day and update the
+       balance *)
+    (stock.close, balance +. (shares_bought *. stock.open_), 0.0)
+(* Reset shares_bought to 0 after selling *)
 
 let calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
     tr_data =
   List.fold_left
-    (determine_buy tr_75th_percentile buy_signal_multiplier)
-    (0.0, starting_balance) tr_data
+    (determine_buy_sell tr_75th_percentile buy_signal_multiplier)
+    (0.0, starting_balance, 0.0)
+    (* Initialize shares_bought to 0 *) tr_data
+  |> fun (_, balance, _) -> (0.0, balance)
+(* Only return the final balance, discarding shares_bought *)
