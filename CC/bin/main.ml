@@ -2,6 +2,19 @@ open Printf
 open Batteries
 open CC
 
+let rec insert_char lst char index =
+  match lst with
+  | [] -> []
+  | h :: t ->
+      if index - 3 > 0 && (index - 3) mod 3 = 0 then
+        char :: h :: insert_char t char (index + 1)
+      else h :: insert_char t char (index + 1)
+
+let format_large_number f =
+  let d = sprintf "%.*f" 2 f in
+  let lst = String.to_list d in
+  "$" ^ String.of_list (List.rev (insert_char (List.rev lst) ',' 0))
+
 let execute_trading_strategy tr_data percentile_threshold buy_signal_multiplier
     starting_balance =
   let tr_75th_percentile =
@@ -11,8 +24,8 @@ let execute_trading_strategy tr_data percentile_threshold buy_signal_multiplier
     StockData.calc_final_bal tr_75th_percentile buy_signal_multiplier
       starting_balance tr_data
   in
-  printf "Starting balance: %f\n" starting_balance;
-  printf "Ending balance: %f\n" (snd final_balance)
+  print_endline ("Starting balance: " ^ format_large_number starting_balance);
+  print_endline ("Final balance: " ^ format_large_number (snd final_balance))
 
 let rec update_list lst prev_close =
   match lst with
