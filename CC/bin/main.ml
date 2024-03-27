@@ -2,14 +2,19 @@ open Printf
 open Batteries
 open CC
 
-let rec insert_char lst char index =
+(** [insert_char lst ch index] inserts ch at intervals of 3 in lst, which should
+    be a reversed list of chars that represent a floating point value with two
+    decimal digits. *)
+let rec insert_char lst ch index =
   match lst with
   | [] -> []
   | h :: t ->
       if index - 3 > 0 && (index - 3) mod 3 = 0 then
-        char :: h :: insert_char t char (index + 1)
-      else h :: insert_char t char (index + 1)
+        ch :: h :: insert_char t ch (index + 1)
+      else h :: insert_char t ch (index + 1)
 
+(** [format_large_number f] returns a string representation of a monetary value
+    f, complete with commas and dollar signs. *)
 let format_large_number f =
   let d = sprintf "%.*f" 2 f in
   let lst = String.to_list d in
