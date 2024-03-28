@@ -1,0 +1,30 @@
+---
+# Members of your group.
+group:
+  - name: Jephthah Mensah
+    netid: jkm255
+  - name: Firstname Lastname
+    netid: ***###
+pm:
+  name: Lawrence Daniels
+  netid: lwd38@cornell.edu
+publish: false
+# Pithy title
+title: "The Camel Capital (CC)"
+
+git-repo: "https://github.coecis.cornell.edu/sjb336/CamelCapital.git"
+
+# If you have no demo screencast, replace the url string with an empty string ""
+demo-video-url: "<link>"
+
+desc: >
+	Our project is an algorithmic trading platform designed for buying and selling 
+	securities, primarily stocks. It offers a comprehensive suite of features including
+	backtesting functionality, live market data compatibility, and the implementation of 
+  trading strategies
+
+	Our platform seamlessly integrates with the yfinance API, allowing users to access 
+  real-	time market data.
+	
+	Users have the flexibility to customize their trading experience by defining their 		
+  preferred parameters, indicators, and risk management strategies. 
