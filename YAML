@@ -13,13 +13,10 @@ pm:
   name: Lawrence Daniels
   netid: lwd38@cornell.edu
 publish: false
-# Pithy title
+
 title: "The Camel Capital (CC)"
 
 git-repo: "https://github.coecis.cornell.edu/sjb336/CamelCapital.git"
-
-# If you have no demo screencast, replace the url string with an empty string ""
-demo-video-url: "<link>"
 
 desc: >
 	Our project is an algorithmic trading platform designed for buying and selling 
