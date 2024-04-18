@@ -1,0 +1,8 @@
+lib: [
+  "_build/install/default/lib/trading_bot/META"
+  "_build/install/default/lib/trading_bot/dune-package"
+  "_build/install/default/lib/trading_bot/opam"
+]
+bin: [
+  "_build/install/default/bin/trading_bot"
+]
