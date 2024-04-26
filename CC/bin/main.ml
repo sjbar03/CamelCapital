@@ -1,4 +1,3 @@
-open Printf
 open Batteries
 open CC
 
@@ -16,7 +15,7 @@ let rec insert_char lst ch index =
 (** [format_large_number f] returns a string representation of a monetary value
     f, complete with commas and dollar signs. *)
 let format_large_number f =
-  let d = sprintf "%.*f" 2 f in
+  let d = Printf.sprintf "%.*f" 2 f in
   let lst = String.to_list d in
   "$" ^ String.of_list (List.rev (insert_char (List.rev lst) ',' 0))
 
@@ -67,6 +66,31 @@ let starting_balance balance_arg default_starting_balance =
   | balance_str :: _ ->
       float_of_string balance_str (* Convert specified balance to float *)
 
+let rec get_valid_int _ =
+  ANSITerminal.printf [ Foreground Red ] "%s" "Please enter an integer: \n";
+  let input = read_int_opt () in
+  if input != None then Option.get input else get_valid_int ()
+
+let rec get_risk _ =
+  ANSITerminal.printf [ Foreground Red ] "%s"
+    "Please enter '1', '2', or '3': \n";
+  let input = read_int_opt () in
+  if input != None && List.mem (Option.get input) [ 1; 2; 3 ] then
+    Option.get input
+  else get_risk ()
+
+let start_ui _ =
+  ANSITerminal.printf [ Bold; Foreground Green ] "%s"
+    "Welcome to Camel Campital! \n";
+  Printf.printf "%s" "  To begin, first enter your desired starting capital: \n";
+  let capital = get_valid_int () in
+  Printf.printf
+    " Next, enter either 1, 2, or 3 to select your risk profile. A higher \
+     number (I.E. 3) carries a higer risk factor. \n";
+  let risk = get_risk () in
+  Printf.printf "%s%i%s%i" "The starting capital and risk are as follows: "
+    capital " / " risk
+
 (* Modify the entry point to handle stock ticker and an optional starting
    balance *)
 let () =
@@ -74,6 +98,7 @@ let () =
   (* Default starting balance *)
   let argv = Array.to_list Sys.argv in
   match argv with
+  | [ _; "risk" ] -> start_ui ()
   | _ :: "csv" :: file_name :: balance_arg ->
       trading_algorithm file_name
         (starting_balance balance_arg default_starting_balance)
