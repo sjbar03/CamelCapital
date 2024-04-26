@@ -81,7 +81,7 @@ let rec get_risk _ =
 
 let start_ui _ =
   ANSITerminal.printf [ Bold; Foreground Green ] "%s"
-    "Welcome to Camel Campital! \n";
+    "Welcome to Camel Capital! \n";
   Printf.printf "%s" "  To begin, first enter your desired starting capital: \n";
   let capital = get_valid_int () in
   Printf.printf
