@@ -1,4 +1,0 @@
-(executable
- (public_name CC)
- (name main)
- (libraries CC batteries ANSITerminal))
