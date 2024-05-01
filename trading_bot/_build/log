@@ -1,0 +1,16 @@
+# dune exec bin/main.exe -- ticker AAPL
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /Users/jephthahmensah/.cache/dune/db
+# Workspace root: /Users/jephthahmensah/cs3110/CamelCapital/trading_bot
+# Auto-detected concurrency: 8
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /Users/jephthahmensah/.opam/cs3110-2024sp/bin/ocamlc.opt -config > /var/folders/kf/m5p4nd_10517c5xy6658cyc00000gn/T/dune_1d28f0_output

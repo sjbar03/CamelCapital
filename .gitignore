@@ -1,0 +1,4 @@
+.env
+*.csv
+CC/_build/
+CC/_opam/
