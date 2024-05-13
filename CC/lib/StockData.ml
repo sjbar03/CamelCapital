@@ -78,3 +78,18 @@ let calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
     (* Initialize shares_bought to 0 *) tr_data
   |> fun (_, balance, _) -> (0.0, balance)
 (* Only return the final balance, discarding shares_bought *)
+
+let calculate_daily_returns stock_data_list =
+  List.map2 (fun sd1 sd2 -> 
+    if sd1.prev_close <> 0.0 then (sd2.close -. sd1.prev_close) /. sd1.prev_close
+    else 0.0
+  ) stock_data_list (List.tl stock_data_list)
+
+let average lst =
+  let sum, count = List.fold_left (fun (s, c) x -> (s +. x, c +. 1.0)) (0.0, 0.0) lst in
+  if count = 0.0 then 0.0 else sum /. count
+
+let expected_return data =
+  let daily_returns = calculate_daily_returns (Array.to_list data) in
+  average daily_returns
+  

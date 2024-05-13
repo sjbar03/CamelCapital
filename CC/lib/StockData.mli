@@ -36,3 +36,14 @@ val calc_final_bal : float -> float -> float -> (t * 'a) list -> float * float
     is the final balance accumulated after considering each day of stock data
     and determining whether or not to buy. If a stock is bought, it sells
     according to next morning's opening price. *)
+
+val calculate_daily_returns : t list -> float list
+(** [calculate_daily_returns stock_data_list] computes the daily returns for a list of stock data. 
+    It returns a list of daily returns calculated as the percentage change from the previous close 
+    to the close of each day. If the previous close is zero, returns zero to avoid division by zero. *)
+val average : float list -> float
+(** [average lst] calculates the average of a list of float values. Returns zero if the list is empty. *)
+
+val expected_return : t array -> float
+(** [expected_return data] calculates the expected return of a list of stock data by first calculating
+    daily returns with [calculate_daily_returns] and then averaging those returns using [average]. *)

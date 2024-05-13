@@ -19,3 +19,6 @@ val estimate_garch_params : t array -> garch_params
 (** the "main" function that gives variance for each stock*)
 val variance : t array -> float
 
+(**kelly criterion function*)
+val kelly_criterion: t array -> float
+

@@ -73,13 +73,21 @@ let rec get_valid_int _ =
   let input = read_int_opt () in
   if input != None then Option.get input else get_valid_int ()
 
-let rec get_risk _ =
-  ANSITerminal.printf [ Foreground Red ] "%s"
-    "Please enter '1', '2', or '3': \n";
-  let input = read_int_opt () in
-  if input != None && List.mem (Option.get input) [ 1; 2; 3 ] then
-    Option.get input
-  else get_risk ()
+
+let rec get_risk () =
+  let lines = File.lines_of "stock_data.csv" in
+  let data_lines = Enum.skip 1 lines in
+  let stock_data_list = 
+    Enum.map StockData.parse_stock_data data_lines |> List.of_enum in
+  let stock_data_array = Array.of_list stock_data_list in
+  let base_kelly = Garch.kelly_criterion stock_data_array in
+  
+  ANSITerminal.printf [Foreground Red] "Please enter '1', '2', or '3': \n";
+  match read_int_opt () with
+  | Some 1 -> log base_kelly   
+  | Some 2 -> base_kelly  
+  | Some 3 -> base_kelly *. base_kelly        
+  | _ -> get_risk ()            
 
 let start_ui _ =
   ANSITerminal.printf [ Bold; Foreground Green ] "%s"
@@ -90,8 +98,9 @@ let start_ui _ =
     " Next, enter either 1, 2, or 3 to select your risk profile. A higher \
      number (I.E. 3) carries a higer risk factor. \n";
   let risk = get_risk () in
-  Printf.printf "%s%i%s%i" "The starting capital and risk are as follows: "
-    capital " / " risk
+  Printf.printf "The starting capital and risk are as follows: %f / %f\n" (float_of_int capital)  risk
+
+
 
 (* GUI *)
 
