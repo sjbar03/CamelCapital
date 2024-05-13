@@ -17,5 +17,5 @@ val objective_function : t array -> garch_params -> float
 val estimate_garch_params : t array -> garch_params
 
 (** the "main" function that gives variance for each stock*)
-val forecast_volatility : t array -> garch_params -> int -> float array
+val variance : t array -> float
 

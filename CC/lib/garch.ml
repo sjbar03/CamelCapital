@@ -42,18 +42,18 @@ let estimate_garch_params data =
   in
   optimize initial_params (objective_function data initial_params) 100
 
-let forecast_volatility data params steps =
-  let residuals = Array.map log_r data in
-  let n = Array.length residuals in
-  let variances = Array.make (n + steps) 0.0 in
-  variances.(0) <- residuals.(0) ** 2.0;
-  for i = 1 to n - 1 do
-    variances.(i) <- params.omega +. params.alpha *. (residuals.(i-1) ** 2.0) +. params.beta *. variances.(i-1);
-  done;
-  for i = n to n + steps - 1 do
-    variances.(i) <- params.omega +. params.alpha *. variances.(i-1) +. params.beta *. variances.(i-1);
-  done;
-  Array.map sqrt (Array.sub variances n steps)
+  let variance data =
+    let params = estimate_garch_params data in
+    let residuals = Array.map log_r data in
+    let n = Array.length residuals in
+    let variances = Array.make (n + 1) 0.0 in
+    variances.(0) <- residuals.(0) ** 2.0;
+    for i = 1 to n - 1 do
+      variances.(i) <- params.omega +. params.alpha *. (residuals.(i-1) ** 2.0) +. params.beta *. variances.(i-1);
+    done;
+    variances.(n) <- params.omega +. params.alpha *. variances.(n-1) +. params.beta *. variances.(n-1);
+    sqrt variances.(n)
+  
 
 
   
