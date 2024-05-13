@@ -1,2 +1,3 @@
 (library
- (name CC))
+ (name CC)
+ (libraries gsl))
