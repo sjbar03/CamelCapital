@@ -73,21 +73,21 @@ let rec get_valid_int _ =
   let input = read_int_opt () in
   if input != None then Option.get input else get_valid_int ()
 
-
 let rec get_risk () =
   let lines = File.lines_of "stock_data.csv" in
   let data_lines = Enum.skip 1 lines in
-  let stock_data_list = 
-    Enum.map StockData.parse_stock_data data_lines |> List.of_enum in
+  let stock_data_list =
+    Enum.map StockData.parse_stock_data data_lines |> List.of_enum
+  in
   let stock_data_array = Array.of_list stock_data_list in
   let base_kelly = Garch.kelly_criterion stock_data_array in
-  
-  ANSITerminal.printf [Foreground Red] "Please enter '1', '2', or '3': \n";
+
+  ANSITerminal.printf [ Foreground Red ] "Please enter '1', '2', or '3': \n";
   match read_int_opt () with
-  | Some 1 -> log base_kelly   
-  | Some 2 -> base_kelly  
-  | Some 3 -> base_kelly *. base_kelly        
-  | _ -> get_risk ()            
+  | Some 1 -> log base_kelly
+  | Some 2 -> base_kelly
+  | Some 3 -> base_kelly *. base_kelly
+  | _ -> get_risk ()
 
 let start_ui _ =
   ANSITerminal.printf [ Bold; Foreground Green ] "%s"
@@ -98,9 +98,8 @@ let start_ui _ =
     " Next, enter either 1, 2, or 3 to select your risk profile. A higher \
      number (I.E. 3) carries a higer risk factor. \n";
   let risk = get_risk () in
-  Printf.printf "The starting capital and risk are as follows: %f / %f\n" (float_of_int capital)  risk
-
-
+  Printf.printf "The starting capital and risk are as follows: %f / %f\n"
+    (float_of_int capital) risk
 
 (* GUI *)
 
@@ -109,7 +108,7 @@ let enter_balance = Bogue.Widget.text_input ~prompt:"Enter starting balance" ()
 let final_balance_label =
   Bogue.Widget.text_display
     (string_of_float
-       StockData.last_1000_days.(Array.length StockData.last_1000_days - 1))
+       StockData.last_1000_day_bal.(Array.length StockData.last_1000_day_bal - 1))
 
 let button =
   Bogue.Widget.button "GO"
@@ -118,51 +117,91 @@ let button =
 let prompt_box =
   Bogue.Layout.(flat_of_w [ enter_balance; button; final_balance_label ])
 
-let chart = Bogue.Widget.sdl_area ~w:500 ~h:500 ()
-let chart_graphic = Bogue.Widget.get_sdl_area chart
+let balance_sdl_area = Bogue.Widget.sdl_area ~w:500 ~h:500 ()
+let bal_graphic = Bogue.Widget.get_sdl_area balance_sdl_area
+let value_sdl_area = Bogue.Widget.sdl_area ~w:500 ~h:500 ()
+let value_graphic = Bogue.Widget.get_sdl_area value_sdl_area
 
-let chart_layout =
-  Bogue.Layout.resident ~name:"Graph"
-    ~background:Bogue.(Layout.color_bg Draw.(lighter (transp yellow)))
-    chart
+let bal_border =
+  Bogue.Style.mk_border
+    (Bogue.Style.mk_line ~color:Bogue.Draw.(opaque pale_grey) ~width:5 ())
+
+let val_border =
+  Bogue.Style.mk_border
+    (Bogue.Style.mk_line ~color:Bogue.Draw.(opaque black) ~width:5 ())
+
+let chart_background border = Bogue.Style.of_border border
+
+let bal_chart =
+  Bogue.Layout.resident ~name:"Balance History (Last 1000 Days)"
+    ~background:Bogue.Layout.(style_bg (chart_background bal_border))
+    balance_sdl_area
+
+let val_chart =
+  Bogue.Layout.resident ~name:"Value History (Last 1000 Days)"
+    ~background:Bogue.Layout.(style_bg (chart_background val_border))
+    value_sdl_area
+
+let chart_layout = Bogue.Layout.flat ~name:"Charts" [ bal_chart; val_chart ]
 
 let main_layout =
   Bogue.Layout.tower ~name:"CamelCapital" [ prompt_box; chart_layout ]
 
-let gen_x_coord starting current =
-  Bogue.Layout.height main_layout
-  - int_of_float ((current -. starting) /. (starting /. 100.))
+let arr_range arr =
+  let range = (arr.(0), arr.(0)) in
+  Array.fold_left
+    (fun range a -> (Float.min (fst range) a, Float.max (snd range) a))
+    range arr
 
-let draw_graph starting =
-  Bogue.Sdl_area.clear chart_graphic;
-  let width = Bogue.Layout.width main_layout * 2 in
-  let tick_spacing = width / Array.length StockData.last_1000_days in
-  for i = 0 to Array.length StockData.last_1000_days - 1 do
-    let bal = StockData.last_1000_days.(i) in
-    let color = Bogue.Draw.(opaque (if bal < starting then red else green)) in
-    Bogue.Sdl_area.draw_circle chart_graphic ~color ~thick:5 ~radius:5
-      (tick_spacing * i, gen_x_coord starting bal)
+let gen_y_coord_from_range range value chart =
+  let high = snd range in
+  let low = fst range in
+  let difference = high -. low in
+  let height = float_of_int (snd (Bogue.Layout.get_physical_size chart)) in
+  let distance_from_min = value -. low in
+  int_of_float (height -. (height /. difference *. distance_from_min))
+
+let draw_graph chart graphic color data =
+  Bogue.Sdl_area.clear graphic;
+  let width = fst (Bogue.Layout.get_physical_size chart) in
+  let tick_spacing = width / Array.length data in
+  let range = arr_range data in
+  for i = 0 to Array.length data - 1 do
+    let curr_val = data.(i) in
+    Bogue.Sdl_area.draw_circle graphic ~color ~thick:5 ~radius:5
+      (tick_spacing * i, gen_y_coord_from_range range curr_val chart)
   done;
-  Bogue.Sdl_area.update chart_graphic
+  Bogue.Sdl_area.update graphic
 
 let board = Bogue.Bogue.of_layout main_layout
+
+let draw_all_graphs _ =
+  draw_graph bal_chart bal_graphic
+    Bogue.Draw.(opaque green)
+    StockData.last_1000_day_bal;
+  draw_graph val_chart value_graphic
+    Bogue.Draw.(opaque blue)
+    StockData.last_1000_day_val
+
+let parse_input enter_balance =
+  String.split
+    (Bogue.Text_input.text (Bogue.Widget.get_text_input enter_balance))
+    ~by:" "
+
+let run_algoritm_from_gui ticker bal =
+  download_data ticker;
+  let csv_file = "stock_data.csv" in
+  trading_algorithm csv_file bal
 
 let submit_balance button enter_balance ev =
   if Bogue.Trigger.should_exit ev then raise Exit
   else if Bogue.Button.is_pressed (Bogue.Widget.get_button button) then
     try
-      let input =
-        String.split
-          (Bogue.Text_input.text (Bogue.Widget.get_text_input enter_balance))
-          ~by:" "
-      in
-      Printf.printf "%s%s" (fst input) (snd input);
+      let input = parse_input enter_balance in
       let bal = float_of_string (snd input) in
       let ticker = fst input in
-      download_data ticker;
-      let csv_file = "stock_data.csv" in
-      trading_algorithm csv_file bal;
-      draw_graph bal;
+      run_algoritm_from_gui ticker bal;
+      draw_all_graphs ();
       Bogue.Bogue.refresh_custom_windows board
     with _ -> ()
 

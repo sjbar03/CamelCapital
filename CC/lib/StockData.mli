@@ -10,7 +10,8 @@ type t = {
 (** A record type that represents a single day of trading information for a
     specific stock with [ticker]*)
 
-val last_1000_days : float array
+val last_1000_day_bal : float array
+val last_1000_day_val : float array
 
 val parse_stock_data : string -> t
 (** [parse_stock_data line] returns a [StockData.t] with information provided by

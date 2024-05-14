@@ -9,7 +9,6 @@ import sys
 ticker = sys.argv[1]
 
 try:
-  print ("reached python" )
   data = yf.download(tickers=ticker, period="10y", interval="1d")
   data.index.name = 'date'
   data.columns = data.columns.str.lower()
