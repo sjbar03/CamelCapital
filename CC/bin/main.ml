@@ -30,8 +30,6 @@ let execute_trading_strategy tr_data percentile_threshold buy_signal_multiplier
   in
   print_endline ("Starting balance: " ^ format_large_number starting_balance);
   print_endline ("Final balance: " ^ format_large_number (snd final_balance))
-(* for i = 0 to Array.length StockData.last_1000_days - 1 do print_endline
-   (string_of_float StockData.last_1000_days.(i)) done *)
 
 let rec update_list lst prev_close =
   match lst with
@@ -104,6 +102,10 @@ let start_ui _ =
 (* GUI *)
 
 let enter_balance = Bogue.Widget.text_input ~prompt:"Enter starting balance" ()
+let example_usage_label = Bogue.Widget.label "Example: AAPL 100000"
+
+let interface_box =
+  Bogue.Layout.tower_of_w [ enter_balance; example_usage_label ]
 
 let final_balance_label =
   Bogue.Widget.text_display
@@ -115,7 +117,18 @@ let button =
     ?bg_on:Bogue.Style.(Some (color_bg Bogue.Draw.(opaque green)))
 
 let prompt_box =
-  Bogue.Layout.(flat_of_w [ enter_balance; button; final_balance_label ])
+  Bogue.Layout.(
+    flat ~align:Bogue.Draw.Center ~scale_content:true
+      [
+        interface_box;
+        Bogue.Layout.resident button;
+        Bogue.Layout.resident final_balance_label;
+      ])
+
+let balance_chart_label = Bogue.Widget.label "Balance (Last 1000 Days)"
+
+let value_chart_label =
+  Bogue.Widget.label "Stock Price at Open (Last 1000 Days)"
 
 let balance_sdl_area = Bogue.Widget.sdl_area ~w:500 ~h:500 ()
 let bal_graphic = Bogue.Widget.get_sdl_area balance_sdl_area
@@ -130,17 +143,17 @@ let val_border =
   Bogue.Style.mk_border
     (Bogue.Style.mk_line ~color:Bogue.Draw.(opaque black) ~width:5 ())
 
-let chart_background border = Bogue.Style.of_border border
-
+(* Bogue layout for the balace chart (last 1000 days) *)
 let bal_chart =
-  Bogue.Layout.resident ~name:"Balance History (Last 1000 Days)"
-    ~background:Bogue.Layout.(style_bg (chart_background bal_border))
-    balance_sdl_area
+  Bogue.Layout.tower_of_w ~name:"Balance History (Last 1000 Days)"
+    ~background:Bogue.Layout.(style_bg (Bogue.Style.of_border bal_border))
+    [ balance_chart_label; balance_sdl_area ]
 
+(* Bogue layout for the value chart (last 1000 days) *)
 let val_chart =
-  Bogue.Layout.resident ~name:"Value History (Last 1000 Days)"
-    ~background:Bogue.Layout.(style_bg (chart_background val_border))
-    value_sdl_area
+  Bogue.Layout.tower_of_w ~name:"Value History (Last 1000 Days)"
+    ~background:Bogue.Layout.(style_bg (Bogue.Style.of_border val_border))
+    [ value_chart_label; value_sdl_area ]
 
 let chart_layout = Bogue.Layout.flat ~name:"Charts" [ bal_chart; val_chart ]
 
@@ -153,13 +166,16 @@ let arr_range arr =
     (fun range a -> (Float.min (fst range) a, Float.max (snd range) a))
     range arr
 
+let translate_value_to_y height difference distance_from_min =
+  int_of_float (height -. (height /. difference *. distance_from_min))
+
 let gen_y_coord_from_range range value chart =
   let high = snd range in
   let low = fst range in
   let difference = high -. low in
   let height = float_of_int (snd (Bogue.Layout.get_physical_size chart)) in
   let distance_from_min = value -. low in
-  int_of_float (height -. (height /. difference *. distance_from_min))
+  translate_value_to_y height difference distance_from_min
 
 let draw_graph chart graphic color data =
   Bogue.Sdl_area.clear graphic;
@@ -193,6 +209,14 @@ let run_algoritm_from_gui ticker bal =
   let csv_file = "stock_data.csv" in
   trading_algorithm csv_file bal
 
+let update_info_display starting_bal =
+  let msg =
+    Printf.sprintf "Starting Balance: %s \nFinal Balance %s"
+      (format_large_number starting_bal)
+      (format_large_number StockData.last_1000_day_bal.(999))
+  in
+  Bogue.Widget.set_text final_balance_label msg
+
 let submit_balance button enter_balance ev =
   if Bogue.Trigger.should_exit ev then raise Exit
   else if Bogue.Button.is_pressed (Bogue.Widget.get_button button) then
@@ -202,6 +226,7 @@ let submit_balance button enter_balance ev =
       let ticker = fst input in
       run_algoritm_from_gui ticker bal;
       draw_all_graphs ();
+      update_info_display bal;
       Bogue.Bogue.refresh_custom_windows board
     with _ -> ()
 
@@ -209,7 +234,9 @@ let balance_button_connection =
   Bogue.Widget.connect button enter_balance submit_balance
     Bogue.Trigger.buttons_down
 
-let () = Bogue.Widget.add_connection button balance_button_connection
+let () =
+  update_info_display 0.0;
+  Bogue.Widget.add_connection button balance_button_connection
 
 (* Modify the entry point to handle stock ticker and an optional starting
    balance *)
