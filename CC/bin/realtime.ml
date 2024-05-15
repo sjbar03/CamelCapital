@@ -4,6 +4,10 @@ open CC
 open Unix
 
 let state_file = "trader_state.txt"
+let global_ticker = ref ""
+let global_bought = ref false
+let global_tr = ref 0.0
+let global_price = ref 0.0
 
 (* Function to read the last state from a file *)
 let read_last_state () =
@@ -92,66 +96,70 @@ let status_msg status =
   Printf.sprintf "STATUS: %s" msg
 
 let status_label = Bogue.Widget.label (status_msg false)
-let tr_msg tr = Printf.sprintf "True Range (Threshold): %f" tr
+let tr_msg tr = Printf.sprintf "True Range: %.2f" tr
 let tr_label = Bogue.Widget.label (tr_msg 0.0)
 let ticker_msg ticker = Printf.sprintf "Ticker: %s" ticker
 let ticker_label = Bogue.Widget.label (ticker_msg "TICK")
+let price_msg price = Printf.sprintf "Current Price: %.2f" price
+let price_label = Bogue.Widget.label (price_msg 0.0)
 
 let status_block =
-  Bogue.Layout.tower_of_w [ status_label; tr_label; ticker_label ]
+  Bogue.Layout.tower_of_w ~w:300
+    [ status_label; price_label; tr_label; ticker_label ]
 
-let terminal_content old_content new_msg =
-  Printf.sprintf "%s\n%s" old_content new_msg
-
-let terminal = Bogue.Widget.text_display (terminal_content "" "Hello World!")
 let ticker_input = Bogue.Widget.text_input ~prompt:"Input Ticker" ()
 let start_button = Bogue.Widget.button "Start"
-let input_and_button = Bogue.Layout.flat_of_w [ ticker_input; start_button ]
+let refresh_button = Bogue.Widget.button "Refresh"
 
-let control_block =
-  Bogue.Layout.tower
-    [
-      Bogue.Layout.resident
-        ~background:
-          (Bogue.Layout.color_bg Bogue.Draw.(transp (find_color "#FFEFBE")))
-        terminal;
-      input_and_button;
-    ]
+let input_and_buttons =
+  Bogue.Layout.flat_of_w [ ticker_input; start_button; refresh_button ]
 
+let control_block = Bogue.Layout.tower [ input_and_buttons ]
 let info_block = Bogue.Layout.flat [ control_block; status_block ]
 let chart = Bogue.Widget.sdl_area ~w:600 ~h:300 ~style:style_border ()
 let chart_graphic = Bogue.Widget.get_sdl_area chart
-let last_15_points = Array.make 15 None
+let last_15_points = Array.make 15 0.0
 
-let get_coordinates i value =
+let get_ith_coordinates i value =
   let chart_layout = Bogue.Layout.resident chart in
   let x =
     fst (Bogue.Layout.get_physical_size chart_layout)
     / Array.length last_15_points
     * i
   in
-  let raw_numbers =
-    Array.map
-      (fun x ->
-        match x with
-        | Some y -> y
-        | None -> 0.0)
-      last_15_points
+  let range = StockData.arr_range last_15_points in
+  let y =
+    StockData.gen_y_coord_from_range
+      (!global_tr *. 0.9, snd range *. 1.1)
+      value chart_layout
   in
-  let range = StockData.arr_range raw_numbers in
-  let y = StockData.gen_y_coord_from_range range value chart_layout in
-  (x, y + 50)
+  (x, y)
+
+let get_all_coords () = Array.mapi get_ith_coordinates last_15_points
 
 let draw_chart () =
   Bogue.Sdl_area.clear chart_graphic;
-  try
-    for index = 0 to Array.length last_15_points do
-      let coords = get_coordinates index (Option.get last_15_points.(index)) in
-      Bogue.Sdl_area.draw_circle chart_graphic
+  let coords = get_all_coords () in
+  let range = StockData.arr_range last_15_points in
+  let tr_line =
+    StockData.gen_y_coord_from_range
+      (!global_tr *. 0.9, snd range *. 1.1)
+      !global_tr
+      (Bogue.Layout.resident chart)
+  in
+  Bogue.Sdl_area.draw_line chart_graphic
+    ~color:Bogue.Draw.(opaque red)
+    ~thick:5 (0, tr_line) (1500, tr_line);
+  for index = 0 to Array.length coords - 1 do
+    Bogue.Sdl_area.draw_circle chart_graphic
+      ~color:Bogue.Draw.(opaque black)
+      ~thick:5 ~radius:5 coords.(index);
+    if index <> Array.length coords - 1 && snd coords.(index + 1) < tr_line then
+      Bogue.Sdl_area.draw_line chart_graphic
         ~color:Bogue.Draw.(opaque black)
-        ~thick:5 ~radius:5 coords
-    done
-  with Invalid_argument _ -> ignore ()
+        ~thick:5 coords.(index)
+        coords.(index + 1)
+  done
 
 let main_layout = Bogue.Layout.tower [ info_block; Bogue.Layout.resident chart ]
 let board = Bogue.Bogue.create [ Bogue.Window.create main_layout ]
@@ -159,20 +167,18 @@ let board = Bogue.Bogue.create [ Bogue.Window.create main_layout ]
 let increment_arr arr new_entry =
   try
     for i = 0 to Array.length arr - 1 do
-      match arr.(i) with
-      | None ->
-          arr.(i) <- Some new_entry;
-          raise Exit
-      | Some _ -> ()
+      if arr.(i) = 0.0 then (
+        arr.(i) <- new_entry;
+        raise Exit)
     done;
-    StockData.shift_in arr (Some new_entry)
+    StockData.shift_in arr new_entry
   with Exit -> ignore ()
 
 (* End GUI *)
 
 (* Updated function to handle both historical and minute-level data *)
 let monitor_and_trade (ticker : string) : unit =
-  Bogue.Sync.push (fun _ -> draw_chart ());
+  global_ticker := ticker;
   let today = Unix.time () in
   let start_date = today -. (86400. *. 100.) |> Unix.localtime in
   let end_date = today |> Unix.localtime in
@@ -204,6 +210,8 @@ let monitor_and_trade (ticker : string) : unit =
   | Some last_data ->
       let tr_data = List.map StockData.true_range stock_data_list in
       let tr_75th_percentile = StockData.moving_percentile tr_data 75.0 in
+      global_tr := tr_75th_percentile;
+      global_price := last_data.StockData.close;
       increment_arr last_15_points last_data.StockData.close;
       if last_data.StockData.close <= tr_75th_percentile then (
         let buy_price = last_data.StockData.close in
@@ -219,7 +227,8 @@ let monitor_and_trade (ticker : string) : unit =
           ticker shares_to_buy buy_price
           (shares_to_buy *. buy_price);
         write_state start_date_str (balance -. cost);
-        Stdlib.flush Stdlib.stdout)
+        Stdlib.flush Stdlib.stdout;
+        global_bought := true)
       else
         Printf.printf
           "Current price: $%.2f, True Range: $%.2f\n\
@@ -244,22 +253,35 @@ let start_trading button ticker_input ev =
   if Bogue.Button.is_pressed (Bogue.Widget.get_button button) then (
     let ticker = Bogue.Widget.get_text ticker_input in
     try
-      while true do
+      while not !global_bought do
         if Bogue.Trigger.should_exit ev then raise Exit
-        else monitor_and_trade ticker;
-        Unix.sleep 1;
-        draw_chart ()
+        else monitor_and_trade ticker
       done
     with Exit ->
       Printf.eprintf "Program Exited by GUI";
       exit 0)
 
+let refresh_gui refresh_button _ ev =
+  if Bogue.Trigger.should_exit ev then raise Exit
+  else if Bogue.Button.is_pressed (Bogue.Widget.get_button refresh_button) then
+    draw_chart ();
+  Bogue.Widget.(
+    set_text ticker_label (ticker_msg !global_ticker);
+    set_text tr_label (tr_msg !global_tr);
+    set_text status_label (status_msg !global_bought);
+    set_text price_label (price_msg !global_price))
+
 let go_connection =
   Bogue.Widget.connect start_button ticker_input start_trading
     Bogue.Trigger.buttons_down
 
+let refresh_connection =
+  Bogue.Widget.connect refresh_button chart refresh_gui
+    Bogue.Trigger.buttons_down
+
 let _ =
   Bogue.Widget.add_connection start_button go_connection;
+  Bogue.Widget.add_connection refresh_button refresh_connection;
   reset_gui ()
 
 (* End GUI *)
