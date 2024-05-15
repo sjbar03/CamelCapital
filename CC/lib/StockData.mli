@@ -11,8 +11,16 @@ type t = {
     specific stock with [ticker]*)
 
 val last_1000_day_bal : float array
+(* Global array for GUI chart data. Last 1000 days of backtesting balaces. *)
+
 val last_1000_day_val : float array
+(* Global array for GUI chart data. Last 1000 days of backtesting stock
+   values. *)
+
 val shift_in : 'a array -> 'a -> unit
+(** [shift_in arr value] shifts value into the rightmost index of arr, shifting
+    each previous entry down one position. Discards the entry at index 0
+    Requires: Array.length arr > 0 *)
 
 val parse_stock_data : string -> t
 (** [parse_stock_data line] returns a [StockData.t] with information provided by
@@ -61,5 +69,8 @@ val calculate_buy_price : t -> float -> float -> float
     whether to buy. *)
 
 val arr_range : float array -> float * float
-val translate_value_to_y : float -> float -> float -> int
-val gen_y_coord_from_range : float * float -> float -> Bogue.Layout.t -> int
+(** [arr_range arr] is the range of values in the array, in the form (min, max) *)
+
+val gen_y_coord_from_range : float * float -> float -> int -> int
+(** [gen_y_coord_from_range] is a translation from a raw float value to a pixel
+    y value, based on the size of the SDL area*)

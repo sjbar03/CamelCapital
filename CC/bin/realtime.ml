@@ -8,6 +8,7 @@ let global_ticker = ref ""
 let global_bought = ref false
 let global_tr = ref 0.0
 let global_price = ref 0.0
+let gui = ref false
 
 (* Function to read the last state from a file *)
 let read_last_state () =
@@ -103,6 +104,8 @@ let ticker_label = Bogue.Widget.label (ticker_msg "TICK")
 let price_msg price = Printf.sprintf "Current Price: %.2f" price
 let price_label = Bogue.Widget.label (price_msg 0.0)
 
+(* Status Block : Layout containing status message, ticker message, price
+   message, and tr message*)
 let status_block =
   Bogue.Layout.tower_of_w ~w:300
     [ status_label; price_label; tr_label; ticker_label ]
@@ -111,15 +114,18 @@ let ticker_input = Bogue.Widget.text_input ~prompt:"Input Ticker" ()
 let start_button = Bogue.Widget.button "Start"
 let refresh_button = Bogue.Widget.button "Refresh"
 
-let input_and_buttons =
+(* Control Block: Layout containing input text box and button controls. *)
+let control_block =
   Bogue.Layout.flat_of_w [ ticker_input; start_button; refresh_button ]
 
-let control_block = Bogue.Layout.tower [ input_and_buttons ]
+(* Info Block: Top half of GUI, all text information. *)
 let info_block = Bogue.Layout.flat [ control_block; status_block ]
 let chart = Bogue.Widget.sdl_area ~w:600 ~h:300 ~style:style_border ()
 let chart_graphic = Bogue.Widget.get_sdl_area chart
 let last_15_points = Array.make 15 0.0
 
+(* Get coordinates corresponding to the ith entry in [last_15_points],
+   translated using StockData utils.*)
 let get_ith_coordinates i value =
   let chart_layout = Bogue.Layout.resident chart in
   let x =
@@ -131,12 +137,17 @@ let get_ith_coordinates i value =
   let y =
     StockData.gen_y_coord_from_range
       (!global_tr *. 0.9, snd range *. 1.1)
-      value chart_layout
+      value
+      (snd (Bogue.Layout.get_physical_size chart_layout))
   in
   (x, y)
 
+(* An array containing ordered pairs, coordinates corresponding to the last 15
+   data points *)
 let get_all_coords () = Array.mapi get_ith_coordinates last_15_points
 
+(* Iterate over all coordinates, plotting them on the graph. Also draw tr
+   (threshold) line. *)
 let draw_chart () =
   Bogue.Sdl_area.clear chart_graphic;
   let coords = get_all_coords () in
@@ -145,7 +156,7 @@ let draw_chart () =
     StockData.gen_y_coord_from_range
       (!global_tr *. 0.9, snd range *. 1.1)
       !global_tr
-      (Bogue.Layout.resident chart)
+      (snd (Bogue.Layout.get_physical_size (Bogue.Layout.resident chart)))
   in
   Bogue.Sdl_area.draw_line chart_graphic
     ~color:Bogue.Draw.(opaque red)
@@ -164,6 +175,8 @@ let draw_chart () =
 let main_layout = Bogue.Layout.tower [ info_block; Bogue.Layout.resident chart ]
 let board = Bogue.Bogue.create [ Bogue.Window.create main_layout ]
 
+(* First grow array from left to right, then when it is 'full' (no entries are
+   0.0) shift in from right. *)
 let increment_arr arr new_entry =
   try
     for i = 0 to Array.length arr - 1 do
@@ -219,17 +232,18 @@ let monitor_and_trade (ticker : string) : unit =
         let shares_to_buy = balance *. 0.10 /. buy_price in
         (* Investing 10% of balance *)
         let cost = shares_to_buy *. buy_price in
-        Printf.printf
-          "Stock Bought: %s\n\
-           Amount: %.2f shares at $%.2f each.\n\
-           Total Cost: $%.2f\n\
-           Selling at opening price tomorrow morning.\n"
-          ticker shares_to_buy buy_price
-          (shares_to_buy *. buy_price);
+        if not !gui then
+          Printf.printf
+            "Stock Bought: %s\n\
+             Amount: %.2f shares at $%.2f each.\n\
+             Total Cost: $%.2f\n\
+             Selling at opening price tomorrow morning.\n"
+            ticker shares_to_buy buy_price
+            (shares_to_buy *. buy_price);
         write_state start_date_str (balance -. cost);
         Stdlib.flush Stdlib.stdout;
         global_bought := true)
-      else
+      else if not !gui then
         Printf.printf
           "Current price: $%.2f, True Range: $%.2f\n\
            Not buying. Current price higher than TR 75th percentile: $%.2f\n"
@@ -249,7 +263,7 @@ let reset_gui () =
     set_text tr_label (tr_msg 0.0);
     set_text status_label (status_msg false))
 
-let start_trading button ticker_input ev =
+let gui_start_trading button ticker_input ev =
   if Bogue.Button.is_pressed (Bogue.Widget.get_button button) then (
     let ticker = Bogue.Widget.get_text ticker_input in
     try
@@ -272,31 +286,34 @@ let refresh_gui refresh_button _ ev =
     set_text price_label (price_msg !global_price))
 
 let go_connection =
-  Bogue.Widget.connect start_button ticker_input start_trading
+  Bogue.Widget.connect start_button ticker_input gui_start_trading
     Bogue.Trigger.buttons_down
 
 let refresh_connection =
   Bogue.Widget.connect refresh_button chart refresh_gui
     Bogue.Trigger.buttons_down
 
-let _ =
+let start_gui () =
+  gui := true;
   Bogue.Widget.add_connection start_button go_connection;
   Bogue.Widget.add_connection refresh_button refresh_connection;
-  reset_gui ()
+  reset_gui ();
+  Bogue.Main.run board
 
 (* End GUI *)
 
 (* Update main function to use the correct function call *)
-let main () =
-  if Array.length Sys.argv < 3 then
-    eprintf "Usage: %s <ticker> [--realtime | <start_date> <end_date>]\n"
-      Sys.argv.(0)
-  else
-    let ticker = Sys.argv.(1) in
-    if Sys.argv.(2) = "--realtime" then Bogue.Main.run board
-    else if Array.length Sys.argv = 4 then (
-      let start_date = Sys.argv.(2) in
-      let end_date = Sys.argv.(3) in
+let no_gui_loop ticker =
+  gui := false;
+  while not !global_bought do
+    monitor_and_trade ticker
+  done
+
+let main_new () =
+  match Array.to_list Sys.argv with
+  | [ _; ticker; "--realtime" ] -> no_gui_loop ticker
+  | [ _; "--realtime"; "gui" ] -> start_gui ()
+  | [ _; ticker; start_date; end_date ] ->
       let last_date, last_balance = read_last_state () in
       let file_name =
         download_and_process_data ticker start_date end_date
@@ -311,15 +328,14 @@ let main () =
       write_state date_str final_balance;
       printf "Last trading session was on: %s with a balance of: $%.2f\n"
         last_date last_balance;
-      printf "Current balance after trading: $%.2f\n" final_balance)
-    else
+      printf "Current balance after trading: $%.2f\n" final_balance
+  | _ ->
       eprintf
-        "Invalid usage. Please use: %s <ticker> [--realtime | <start_date> \
-         <end_date>]\n"
+        "Usage: %s <ticker> [--realtime | --gui <start_date> <end_date>]\n"
         Sys.argv.(0)
 
 let () =
   Sys.catch_break true;
-  try main () with
+  try main_new () with
   | Sys.Break -> Printf.printf "\nProgram interrupted by user. Exiting...\n"
   | e -> Printf.printf "Unexpected error: %s\n" (Printexc.to_string e)

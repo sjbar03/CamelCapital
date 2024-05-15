@@ -168,7 +168,9 @@ let draw_graph chart graphic color data =
   for i = 0 to Array.length data - 1 do
     let curr_val = data.(i) in
     Bogue.Sdl_area.draw_circle graphic ~color ~thick:5 ~radius:5
-      (tick_spacing * i, StockData.gen_y_coord_from_range range curr_val chart)
+      ( tick_spacing * i,
+        StockData.gen_y_coord_from_range range curr_val
+          (snd (Bogue.Layout.get_physical_size chart)) )
   done;
   Bogue.Sdl_area.update graphic
 

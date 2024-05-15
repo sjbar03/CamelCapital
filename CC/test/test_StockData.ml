@@ -603,3 +603,57 @@ let suite8 =
        ]
 
 let _ = run_test_tt_main suite8
+
+let test_shift_in =
+  let arr = Array.make 5 0 in
+  shift_in arr 5;
+  assert_equal arr.(4) 5;
+  for i = 0 to 4 do
+    shift_in arr i;
+    assert_equal arr.(4) i
+  done;
+  for i = 0 to 4 do
+    assert_equal arr.(i) i
+  done;
+
+  let arr2 = [| 1 |] in
+  shift_in arr2 5;
+  assert_equal arr2.(0) 5;
+  assert_equal (Array.length arr2) 1
+
+let test_arr_range =
+  let arr1 = [| 2.0; 3.9; 0.; -12.9; 14. |] in
+  assert_equal (arr_range arr1) (-12.9, 14.);
+
+  let arr2 = [||] in
+  assert_equal (arr_range arr2) (0.0, 0.0);
+
+  let arr3 = [| -1.2; -12.3; 0.0; -100.9; -3.91921 |] in
+  assert_equal (arr_range arr3) (-100.9, 0.0);
+
+  let arr4 = [| 1.0 |] in
+  assert_equal (arr_range arr4) (1.0, 1.0);
+
+  let arr5 = [| 1.; 2. |] in
+  assert_equal (arr_range arr5) (1., 2.)
+
+let test_gen_y_coords_from_range =
+  let test_board_size = 1500 in
+  assert_equal (gen_y_coord_from_range (0., 1000.) 750. test_board_size) 375;
+  assert_equal (gen_y_coord_from_range (500., 750.) 750. test_board_size) 0;
+  assert_equal (gen_y_coord_from_range (333., 999.) 333. test_board_size) 1500;
+  let test_board_size2 = 300 in
+  assert_equal (gen_y_coord_from_range (10., 20.) 19. test_board_size2) 30;
+  assert_equal
+    (gen_y_coord_from_range (2000., 5000.) 3133. test_board_size2)
+    186
+
+let suite9 =
+  "Utilities Tests"
+  >::: [
+         ("Shift In Tests" >:: fun _ -> test_shift_in);
+         ("arr_range tests" >:: fun _ -> test_arr_range);
+         ("Y-gen Tests" >:: fun _ -> test_gen_y_coords_from_range);
+       ]
+
+let _ = run_test_tt_main suite9
