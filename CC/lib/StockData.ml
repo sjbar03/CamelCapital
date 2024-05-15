@@ -93,3 +93,20 @@ let expected_return data =
 
 let calculate_buy_price sd tr_75th_percentile buy_signal_multiplier =
   sd.close -. (tr_75th_percentile *. buy_signal_multiplier)
+
+let arr_range arr =
+  let range = (arr.(0), arr.(0)) in
+  Array.fold_left
+    (fun range a -> (Float.min (fst range) a, Float.max (snd range) a))
+    range arr
+
+let translate_value_to_y height difference distance_from_min =
+  int_of_float (height -. (height /. difference *. distance_from_min))
+
+let gen_y_coord_from_range range value chart =
+  let high = snd range in
+  let low = fst range in
+  let difference = high -. low in
+  let height = float_of_int (snd (Bogue.Layout.get_physical_size chart)) in
+  let distance_from_min = value -. low in
+  translate_value_to_y height difference distance_from_min

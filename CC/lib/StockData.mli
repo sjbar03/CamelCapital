@@ -12,6 +12,7 @@ type t = {
 
 val last_1000_day_bal : float array
 val last_1000_day_val : float array
+val shift_in : 'a array -> 'a -> unit
 
 val parse_stock_data : string -> t
 (** [parse_stock_data line] returns a [StockData.t] with information provided by
@@ -58,3 +59,7 @@ val calculate_buy_price : t -> float -> float -> float
     the 75th percentile true range, and a buy signal multiplier. This price is
     what the algorithm will use to compare against the current price to decide
     whether to buy. *)
+
+val arr_range : float array -> float * float
+val translate_value_to_y : float -> float -> float -> int
+val gen_y_coord_from_range : float * float -> float -> Bogue.Layout.t -> int

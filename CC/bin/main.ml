@@ -160,32 +160,15 @@ let chart_layout = Bogue.Layout.flat ~name:"Charts" [ bal_chart; val_chart ]
 let main_layout =
   Bogue.Layout.tower ~name:"CamelCapital" [ prompt_box; chart_layout ]
 
-let arr_range arr =
-  let range = (arr.(0), arr.(0)) in
-  Array.fold_left
-    (fun range a -> (Float.min (fst range) a, Float.max (snd range) a))
-    range arr
-
-let translate_value_to_y height difference distance_from_min =
-  int_of_float (height -. (height /. difference *. distance_from_min))
-
-let gen_y_coord_from_range range value chart =
-  let high = snd range in
-  let low = fst range in
-  let difference = high -. low in
-  let height = float_of_int (snd (Bogue.Layout.get_physical_size chart)) in
-  let distance_from_min = value -. low in
-  translate_value_to_y height difference distance_from_min
-
 let draw_graph chart graphic color data =
   Bogue.Sdl_area.clear graphic;
   let width = fst (Bogue.Layout.get_physical_size chart) in
   let tick_spacing = width / Array.length data in
-  let range = arr_range data in
+  let range = StockData.arr_range data in
   for i = 0 to Array.length data - 1 do
     let curr_val = data.(i) in
     Bogue.Sdl_area.draw_circle graphic ~color ~thick:5 ~radius:5
-      (tick_spacing * i, gen_y_coord_from_range range curr_val chart)
+      (tick_spacing * i, StockData.gen_y_coord_from_range range curr_val chart)
   done;
   Bogue.Sdl_area.update graphic
 

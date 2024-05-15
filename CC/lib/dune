@@ -1,5 +1,5 @@
 (library
  (name CC)
- (libraries gsl)
+ (libraries gsl bogue)
  (instrumentation
   (backend bisect_ppx)))
