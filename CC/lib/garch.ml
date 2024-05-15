@@ -18,16 +18,18 @@ let log_r stock =
   else round_to_4dp 0.0
 
 let objective_function data params =
-  let residuals = Array.map log_r data in
-  let variances = Array.make (Array.length residuals) 0.0 in
-  variances.(0) <- residuals.(0) ** 2.0;
-  for i = 1 to Array.length residuals - 1 do
-    variances.(i) <-
-      params.omega
-      +. (params.alpha *. (residuals.(i - 1) ** 2.0))
-      +. (params.beta *. variances.(i - 1))
-  done;
-  Array.fold_left ( +. ) 0.0 variances
+  if Array.length data = 0 then 0.0
+  else
+    let residuals = Array.map log_r data in
+    let variances = Array.make (Array.length residuals) 0.0 in
+    variances.(0) <- residuals.(0) ** 2.0;
+    for i = 1 to Array.length residuals - 1 do
+      variances.(i) <-
+        params.omega
+        +. (params.alpha *. (residuals.(i - 1) ** 2.0))
+        +. (params.beta *. variances.(i - 1))
+    done;
+    Array.fold_left ( +. ) 0.0 variances
 
 let estimate_garch_params data =
   let initial_params = { alpha = 0.05; beta = 0.90; omega = 0.01 } in
