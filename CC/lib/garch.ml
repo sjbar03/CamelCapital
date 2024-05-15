@@ -1,4 +1,9 @@
 (*@author Carson Wolber ctw54*)
+
+let round_to_4dp x =
+  let factor = 10.0 ** 4.0 in
+  floor ((x *. factor) +. 0.5) /. factor
+
 open StockData
 
 type garch_params = {
@@ -8,7 +13,9 @@ type garch_params = {
 }
 
 let log_r stock =
-  if stock.prev_close <> 0.0 then log (stock.close /. stock.prev_close) else 0.0
+  if stock.prev_close <> 0.0 then
+    round_to_4dp (log (stock.close /. stock.prev_close))
+  else round_to_4dp 0.0
 
 let objective_function data params =
   let residuals = Array.map log_r data in
