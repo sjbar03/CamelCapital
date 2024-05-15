@@ -2,3 +2,5 @@
 *.csv
 CC/_build/
 CC/_opam/
+trading_bot/_build/
+trading_bot/_opam/

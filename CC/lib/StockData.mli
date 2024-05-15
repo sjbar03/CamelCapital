@@ -10,7 +10,8 @@ type t = {
 (** A record type that represents a single day of trading information for a
     specific stock with [ticker]*)
 
-val last_1000_days : float array
+val last_1000_day_bal : float array
+val last_1000_day_val : float array
 
 val parse_stock_data : string -> t
 (** [parse_stock_data line] returns a [StockData.t] with information provided by
@@ -51,3 +52,9 @@ val expected_return : t array -> float
 (** [expected_return data] calculates the expected return of a list of stock
     data by first calculating daily returns with [calculate_daily_returns] and
     then averaging those returns using [average]. *)
+
+val calculate_buy_price : t -> float -> float -> float
+(** Calculates the desired buy price for a stock based on its last close price,
+    the 75th percentile true range, and a buy signal multiplier. This price is
+    what the algorithm will use to compare against the current price to decide
+    whether to buy. *)

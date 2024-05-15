@@ -30,8 +30,6 @@ let execute_trading_strategy tr_data percentile_threshold buy_signal_multiplier
   in
   print_endline ("Starting balance: " ^ format_large_number starting_balance);
   print_endline ("Final balance: " ^ format_large_number (snd final_balance))
-(* for i = 0 to Array.length StockData.last_1000_days - 1 do print_endline
-   (string_of_float StockData.last_1000_days.(i)) done *)
 
 let rec update_list lst prev_close =
   match lst with
@@ -73,21 +71,21 @@ let rec get_valid_int _ =
   let input = read_int_opt () in
   if input != None then Option.get input else get_valid_int ()
 
-
 let rec get_risk () =
   let lines = File.lines_of "stock_data.csv" in
   let data_lines = Enum.skip 1 lines in
-  let stock_data_list = 
-    Enum.map StockData.parse_stock_data data_lines |> List.of_enum in
+  let stock_data_list =
+    Enum.map StockData.parse_stock_data data_lines |> List.of_enum
+  in
   let stock_data_array = Array.of_list stock_data_list in
   let base_kelly = Garch.kelly_criterion stock_data_array in
-  
-  ANSITerminal.printf [Foreground Red] "Please enter '1', '2', or '3': \n";
+
+  ANSITerminal.printf [ Foreground Red ] "Please enter '1', '2', or '3': \n";
   match read_int_opt () with
-  | Some 1 -> log base_kelly   
-  | Some 2 -> base_kelly  
-  | Some 3 -> base_kelly *. base_kelly        
-  | _ -> get_risk ()            
+  | Some 1 -> log base_kelly
+  | Some 2 -> base_kelly
+  | Some 3 -> base_kelly *. base_kelly
+  | _ -> get_risk ()
 
 let start_ui _ =
   ANSITerminal.printf [ Bold; Foreground Green ] "%s"
@@ -98,71 +96,137 @@ let start_ui _ =
     " Next, enter either 1, 2, or 3 to select your risk profile. A higher \
      number (I.E. 3) carries a higer risk factor. \n";
   let risk = get_risk () in
-  Printf.printf "The starting capital and risk are as follows: %f / %f\n" (float_of_int capital)  risk
-
-
+  Printf.printf "The starting capital and risk are as follows: %f / %f\n"
+    (float_of_int capital) risk
 
 (* GUI *)
 
 let enter_balance = Bogue.Widget.text_input ~prompt:"Enter starting balance" ()
+let example_usage_label = Bogue.Widget.label "Example: AAPL 100000"
+
+let interface_box =
+  Bogue.Layout.tower_of_w [ enter_balance; example_usage_label ]
 
 let final_balance_label =
   Bogue.Widget.text_display
     (string_of_float
-       StockData.last_1000_days.(Array.length StockData.last_1000_days - 1))
+       StockData.last_1000_day_bal.(Array.length StockData.last_1000_day_bal - 1))
 
 let button =
   Bogue.Widget.button "GO"
     ?bg_on:Bogue.Style.(Some (color_bg Bogue.Draw.(opaque green)))
 
 let prompt_box =
-  Bogue.Layout.(flat_of_w [ enter_balance; button; final_balance_label ])
+  Bogue.Layout.(
+    flat ~align:Bogue.Draw.Center ~scale_content:true
+      [
+        interface_box;
+        Bogue.Layout.resident button;
+        Bogue.Layout.resident final_balance_label;
+      ])
 
-let chart = Bogue.Widget.sdl_area ~w:500 ~h:500 ()
-let chart_graphic = Bogue.Widget.get_sdl_area chart
+let balance_chart_label = Bogue.Widget.label "Balance (Last 1000 Days)"
 
-let chart_layout =
-  Bogue.Layout.resident ~name:"Graph"
-    ~background:Bogue.(Layout.color_bg Draw.(lighter (transp yellow)))
-    chart
+let value_chart_label =
+  Bogue.Widget.label "Stock Price at Open (Last 1000 Days)"
+
+let balance_sdl_area = Bogue.Widget.sdl_area ~w:500 ~h:500 ()
+let bal_graphic = Bogue.Widget.get_sdl_area balance_sdl_area
+let value_sdl_area = Bogue.Widget.sdl_area ~w:500 ~h:500 ()
+let value_graphic = Bogue.Widget.get_sdl_area value_sdl_area
+
+let bal_border =
+  Bogue.Style.mk_border
+    (Bogue.Style.mk_line ~color:Bogue.Draw.(opaque pale_grey) ~width:5 ())
+
+let val_border =
+  Bogue.Style.mk_border
+    (Bogue.Style.mk_line ~color:Bogue.Draw.(opaque black) ~width:5 ())
+
+(* Bogue layout for the balace chart (last 1000 days) *)
+let bal_chart =
+  Bogue.Layout.tower_of_w ~name:"Balance History (Last 1000 Days)"
+    ~background:Bogue.Layout.(style_bg (Bogue.Style.of_border bal_border))
+    [ balance_chart_label; balance_sdl_area ]
+
+(* Bogue layout for the value chart (last 1000 days) *)
+let val_chart =
+  Bogue.Layout.tower_of_w ~name:"Value History (Last 1000 Days)"
+    ~background:Bogue.Layout.(style_bg (Bogue.Style.of_border val_border))
+    [ value_chart_label; value_sdl_area ]
+
+let chart_layout = Bogue.Layout.flat ~name:"Charts" [ bal_chart; val_chart ]
 
 let main_layout =
   Bogue.Layout.tower ~name:"CamelCapital" [ prompt_box; chart_layout ]
 
-let gen_x_coord starting current =
-  Bogue.Layout.height main_layout
-  - int_of_float ((current -. starting) /. (starting /. 100.))
+let arr_range arr =
+  let range = (arr.(0), arr.(0)) in
+  Array.fold_left
+    (fun range a -> (Float.min (fst range) a, Float.max (snd range) a))
+    range arr
 
-let draw_graph starting =
-  Bogue.Sdl_area.clear chart_graphic;
-  let width = Bogue.Layout.width main_layout * 2 in
-  let tick_spacing = width / Array.length StockData.last_1000_days in
-  for i = 0 to Array.length StockData.last_1000_days - 1 do
-    let bal = StockData.last_1000_days.(i) in
-    let color = Bogue.Draw.(opaque (if bal < starting then red else green)) in
-    Bogue.Sdl_area.draw_circle chart_graphic ~color ~thick:5 ~radius:5
-      (tick_spacing * i, gen_x_coord starting bal)
+let translate_value_to_y height difference distance_from_min =
+  int_of_float (height -. (height /. difference *. distance_from_min))
+
+let gen_y_coord_from_range range value chart =
+  let high = snd range in
+  let low = fst range in
+  let difference = high -. low in
+  let height = float_of_int (snd (Bogue.Layout.get_physical_size chart)) in
+  let distance_from_min = value -. low in
+  translate_value_to_y height difference distance_from_min
+
+let draw_graph chart graphic color data =
+  Bogue.Sdl_area.clear graphic;
+  let width = fst (Bogue.Layout.get_physical_size chart) in
+  let tick_spacing = width / Array.length data in
+  let range = arr_range data in
+  for i = 0 to Array.length data - 1 do
+    let curr_val = data.(i) in
+    Bogue.Sdl_area.draw_circle graphic ~color ~thick:5 ~radius:5
+      (tick_spacing * i, gen_y_coord_from_range range curr_val chart)
   done;
-  Bogue.Sdl_area.update chart_graphic
+  Bogue.Sdl_area.update graphic
 
 let board = Bogue.Bogue.of_layout main_layout
+
+let draw_all_graphs _ =
+  draw_graph bal_chart bal_graphic
+    Bogue.Draw.(opaque green)
+    StockData.last_1000_day_bal;
+  draw_graph val_chart value_graphic
+    Bogue.Draw.(opaque blue)
+    StockData.last_1000_day_val
+
+let parse_input enter_balance =
+  String.split
+    (Bogue.Text_input.text (Bogue.Widget.get_text_input enter_balance))
+    ~by:" "
+
+let run_algoritm_from_gui ticker bal =
+  download_data ticker;
+  let csv_file = "stock_data.csv" in
+  trading_algorithm csv_file bal
+
+let update_info_display starting_bal =
+  let msg =
+    Printf.sprintf "Starting Balance: %s \nFinal Balance %s"
+      (format_large_number starting_bal)
+      (format_large_number StockData.last_1000_day_bal.(999))
+  in
+  Bogue.Widget.set_text final_balance_label msg
 
 let submit_balance button enter_balance ev =
   if Bogue.Trigger.should_exit ev then raise Exit
   else if Bogue.Button.is_pressed (Bogue.Widget.get_button button) then
     try
-      let input =
-        String.split
-          (Bogue.Text_input.text (Bogue.Widget.get_text_input enter_balance))
-          ~by:" "
-      in
-      Printf.printf "%s%s" (fst input) (snd input);
+      let input = parse_input enter_balance in
       let bal = float_of_string (snd input) in
       let ticker = fst input in
-      download_data ticker;
-      let csv_file = "stock_data.csv" in
-      trading_algorithm csv_file bal;
-      draw_graph bal;
+      run_algoritm_from_gui ticker bal;
+      draw_all_graphs ();
+      update_info_display bal;
       Bogue.Bogue.refresh_custom_windows board
     with _ -> ()
 
@@ -170,7 +234,9 @@ let balance_button_connection =
   Bogue.Widget.connect button enter_balance submit_balance
     Bogue.Trigger.buttons_down
 
-let () = Bogue.Widget.add_connection button balance_button_connection
+let () =
+  update_info_display 0.0;
+  Bogue.Widget.add_connection button balance_button_connection
 
 (* Modify the entry point to handle stock ticker and an optional starting
    balance *)

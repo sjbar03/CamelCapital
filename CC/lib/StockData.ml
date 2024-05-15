@@ -8,7 +8,8 @@ type t = {
   prev_close : float;
 }
 
-let last_1000_days = Array.make 1000 0.0
+let last_1000_day_bal = Array.make 1000 0.0
+let last_1000_day_val = Array.make 1000 0.0
 
 let shift_in arr value =
   for i = 0 to Array.length arr - 2 do
@@ -40,7 +41,7 @@ let parse_stock_data line =
 
 let update_prev_close stock_data prev_close = { stock_data with prev_close }
 
-let true_range sd =
+let true_range (sd : t) =
   List.fold_left max (sd.high -. sd.low)
     [ sd.high -. sd.prev_close; sd.prev_close -. sd.low ]
 
@@ -66,7 +67,8 @@ let determine_buy_sell tr_75th_percentile buy_signal_multiplier
     (* Sell all shares at the opening price of the current day and update the
        balance *)
     let bal = balance +. (shares_bought *. stock.open_) in
-    shift_in last_1000_days bal;
+    shift_in last_1000_day_bal bal;
+    shift_in last_1000_day_val stock.open_;
     (stock.close, bal, 0.0)
 (* Reset shares_bought to 0 after selling *)
 
@@ -80,16 +82,22 @@ let calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
 (* Only return the final balance, discarding shares_bought *)
 
 let calculate_daily_returns stock_data_list =
-  List.map2 (fun sd1 sd2 -> 
-    if sd1.prev_close <> 0.0 then (sd2.close -. sd1.prev_close) /. sd1.prev_close
-    else 0.0
-  ) stock_data_list (List.tl stock_data_list)
+  List.map2
+    (fun sd1 sd2 ->
+      if sd1.prev_close <> 0.0 then
+        (sd2.close -. sd1.prev_close) /. sd1.prev_close
+      else 0.0)
+    stock_data_list (List.tl stock_data_list)
 
 let average lst =
-  let sum, count = List.fold_left (fun (s, c) x -> (s +. x, c +. 1.0)) (0.0, 0.0) lst in
+  let sum, count =
+    List.fold_left (fun (s, c) x -> (s +. x, c +. 1.0)) (0.0, 0.0) lst
+  in
   if count = 0.0 then 0.0 else sum /. count
 
 let expected_return data =
   let daily_returns = calculate_daily_returns (Array.to_list data) in
   average daily_returns
-  
+
+let calculate_buy_price sd tr_75th_percentile buy_signal_multiplier =
+  sd.close -. (tr_75th_percentile *. buy_signal_multiplier)
