@@ -10,6 +10,8 @@ type t = {
 
 let last_1000_day_bal = Array.make 1000 0.0
 let last_1000_day_val = Array.make 1000 0.0
+let last_1000_day_bal = Array.make 1000 0.0
+let last_1000_day_val = Array.make 1000 0.0
 
 let shift_in arr value =
   for i = 0 to Array.length arr - 2 do
@@ -42,6 +44,7 @@ let parse_stock_data line =
 let update_prev_close stock_data prev_close = { stock_data with prev_close }
 
 let true_range (sd : t) =
+let true_range (sd : t) =
   List.fold_left max (sd.high -. sd.low)
     [ sd.high -. sd.prev_close; sd.prev_close -. sd.low ]
 
@@ -69,6 +72,8 @@ let determine_buy_sell tr_75th_percentile buy_signal_multiplier
     let bal = balance +. (shares_bought *. stock.open_) in
     shift_in last_1000_day_bal bal;
     shift_in last_1000_day_val stock.open_;
+    shift_in last_1000_day_bal bal;
+    shift_in last_1000_day_val stock.open_;
     (stock.close, bal, 0.0)
 (* Reset shares_bought to 0 after selling *)
 
@@ -88,8 +93,17 @@ let calculate_daily_returns stock_data_list =
         (sd2.close -. sd1.prev_close) /. sd1.prev_close
       else 0.0)
     stock_data_list (List.tl stock_data_list)
+  List.map2
+    (fun sd1 sd2 ->
+      if sd1.prev_close <> 0.0 then
+        (sd2.close -. sd1.prev_close) /. sd1.prev_close
+      else 0.0)
+    stock_data_list (List.tl stock_data_list)
 
 let average lst =
+  let sum, count =
+    List.fold_left (fun (s, c) x -> (s +. x, c +. 1.0)) (0.0, 0.0) lst
+  in
   let sum, count =
     List.fold_left (fun (s, c) x -> (s +. x, c +. 1.0)) (0.0, 0.0) lst
   in
