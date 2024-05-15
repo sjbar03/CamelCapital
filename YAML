@@ -22,10 +22,18 @@ desc: >
 	Our project is an algorithmic trading platform designed for buying and selling 
 	securities, primarily stocks. It offers a comprehensive suite of features including
 	backtesting functionality, live market data compatibility, and the implementation of 
-  trading strategies
+	trading strategies.
 
-	Our platform seamlessly integrates with the yfinance API, allowing users to access 
-  real-	time market data.
-	
-	Users have the flexibility to customize their trading experience by defining their 		
-  preferred parameters, indicators, and risk management strategies. 
+        We have developed an interactive GUI which allows users to repeatedly run backtests
+        on separate stocks and separate starting balances without being required to quit and
+        restart the application. Custom charts display the trend in backtesting data and stock
+        value over the last 1000 days of backtesting.
+
+        Additionally, we have implemented real-time paper trading. Given a stock ticker, the
+        real-time trading algorithm analyzes the stock price every minute to determine if it is 
+        below a certain threshold, and if so, purchases the stock.
+
+        Our refined trading algorithm leverages the Kelly-Criterion and assigns a risk profile
+        at launch, allowing users more control over their fund allocation. We have also developed 
+        a substantial test suite to ensure the correctness of our algorithms and system 
+        infrastructure.
