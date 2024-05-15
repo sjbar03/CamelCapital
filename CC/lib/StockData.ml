@@ -10,8 +10,6 @@ type t = {
 
 let last_1000_day_bal = Array.make 1000 0.0
 let last_1000_day_val = Array.make 1000 0.0
-let last_1000_day_bal = Array.make 1000 0.0
-let last_1000_day_val = Array.make 1000 0.0
 
 let shift_in arr value =
   for i = 0 to Array.length arr - 2 do
@@ -31,20 +29,17 @@ let parse_stock_data line =
       {
         date;
         ticker = "AAPL";
-        (* Directly assign 'AAPL' as the ticker *)
         high = safe_float_of_string high line;
         low = safe_float_of_string low line;
         open_ = safe_float_of_string open_ line;
         close = safe_float_of_string close line;
         prev_close = 0.0;
-        (* This will be updated based on logic to handle previous close *)
       }
   | _ -> failwith (Printf.sprintf "Incorrect CSV format for line: %s" line)
 
 let update_prev_close stock_data prev_close = { stock_data with prev_close }
 
-let true_range (sd : t) =
-let true_range (sd : t) =
+let true_range sd =
   List.fold_left max (sd.high -. sd.low)
     [ sd.high -. sd.prev_close; sd.prev_close -. sd.low ]
 
@@ -55,7 +50,6 @@ let moving_percentile tr_list percentile =
   in
   List.nth sorted_list index
 
-(* Add a new parameter to carry the number of shares bought *)
 let determine_buy_sell tr_75th_percentile buy_signal_multiplier
     (prev_close, balance, shares_bought) (stock, _tr) =
   let buy_price =
@@ -63,36 +57,23 @@ let determine_buy_sell tr_75th_percentile buy_signal_multiplier
   in
   if stock.low <= buy_price && prev_close < buy_price then
     let shares_to_buy = balance *. 0.15 /. buy_price in
-    (* Assuming 15% of balance is used for buying *)
     let bal = balance -. (shares_to_buy *. buy_price) in
     (stock.close, bal, shares_bought +. shares_to_buy)
   else
-    (* Sell all shares at the opening price of the current day and update the
-       balance *)
     let bal = balance +. (shares_bought *. stock.open_) in
     shift_in last_1000_day_bal bal;
     shift_in last_1000_day_val stock.open_;
-    shift_in last_1000_day_bal bal;
-    shift_in last_1000_day_val stock.open_;
     (stock.close, bal, 0.0)
-(* Reset shares_bought to 0 after selling *)
 
 let calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
     tr_data =
   List.fold_left
     (determine_buy_sell tr_75th_percentile buy_signal_multiplier)
     (0.0, starting_balance, 0.0)
-    (* Initialize shares_bought to 0 *) tr_data
+    tr_data
   |> fun (_, balance, _) -> (0.0, balance)
-(* Only return the final balance, discarding shares_bought *)
 
 let calculate_daily_returns stock_data_list =
-  List.map2
-    (fun sd1 sd2 ->
-      if sd1.prev_close <> 0.0 then
-        (sd2.close -. sd1.prev_close) /. sd1.prev_close
-      else 0.0)
-    stock_data_list (List.tl stock_data_list)
   List.map2
     (fun sd1 sd2 ->
       if sd1.prev_close <> 0.0 then
@@ -102,12 +83,9 @@ let calculate_daily_returns stock_data_list =
 
 let average lst =
   let sum, count =
-    List.fold_left (fun (s, c) x -> (s +. x, c +. 1.0)) (0.0, 0.0) lst
+    List.fold_left (fun (s, c) x -> (s +. x, c + 1)) (0.0, 0) lst
   in
-  let sum, count =
-    List.fold_left (fun (s, c) x -> (s +. x, c +. 1.0)) (0.0, 0.0) lst
-  in
-  if count = 0.0 then 0.0 else sum /. count
+  if count = 0 then 0.0 else sum /. float_of_int count
 
 let expected_return data =
   let daily_returns = calculate_daily_returns (Array.to_list data) in
