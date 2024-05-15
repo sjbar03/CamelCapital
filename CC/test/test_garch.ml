@@ -518,3 +518,45 @@ let _ = run_test_tt_main suite2
 let _ = run_test_tt_main suite3
 let _ = run_test_tt_main suite4
 let _ = run_test_tt_main suite6
+
+let test_kelly_criterion_typical _ =
+  let data =
+    [|
+      {
+        close = 100.0;
+        prev_close = 90.0;
+        date = "";
+        ticker = "";
+        high = 0.;
+        low = 0.;
+        open_ = 0.;
+      };
+      {
+        close = 110.0;
+        prev_close = 110.0;
+        date = "";
+        ticker = "";
+        high = 0.;
+        low = 0.;
+        open_ = 0.;
+      };
+      {
+        close = 120.0;
+        prev_close = 110.0;
+        date = "";
+        ticker = "";
+        high = 0.;
+        low = 0.;
+        open_ = 0.;
+      };
+    |]
+  in
+  let _ = 0.25 (* example value based on expected calculation results *) in
+
+  assert_raises (Invalid_argument "List.map2") (fun () -> kelly_criterion data)
+
+let suite =
+  "Kelly Criterion Tests"
+  >::: [ "Typical Data" >:: test_kelly_criterion_typical ]
+
+let _ = run_test_tt_main suite

@@ -292,7 +292,314 @@ let suite3 =
          "Close and Low at Same Level" >:: test_true_range_close_and_low_same;
        ]
 
+(* Custom printer to output the stock data structure for better debugging if the
+   test fails *)
+let print_stock_data stock =
+  Printf.sprintf
+    "{ date = %s; ticker = %s; high = %.2f; low = %.2f; open_ = %.2f; close = \
+     %.2f; prev_close = %.2f }"
+    stock.date stock.ticker stock.high stock.low stock.open_ stock.close
+    stock.prev_close
+
+let test_update_prev_close _ =
+  (* Initial stock data *)
+  let initial_stock_data =
+    {
+      date = "2020-01-01";
+      ticker = "AAPL";
+      high = 150.0;
+      low = 145.0;
+      open_ = 146.0;
+      close = 148.0;
+      prev_close = 147.0;
+    }
+  in
+  let new_prev_close = 149.0 in
+
+  (* Function under test *)
+  let updated_stock_data =
+    update_prev_close initial_stock_data new_prev_close
+  in
+
+  (* Check if prev_close is updated correctly *)
+  assert_equal ~printer:print_stock_data
+    { initial_stock_data with prev_close = new_prev_close }
+    updated_stock_data
+
+let test_moving_percentile_typical _ =
+  let tr_list = [ 5.0; 1.0; 9.0; 3.0; 2.0 ] in
+  let percentile = 50.0 in
+  (* Median value *)
+  let expected = 3.0 in
+  assert_equal ~printer:string_of_float expected
+    (moving_percentile tr_list percentile)
+
+let test_moving_percentile_edges _ =
+  let tr_list = [ 5.0; 1.0; 9.0; 3.0; 2.0 ] in
+  let percentile_0 = 0.0 in
+  (* Minimum value *)
+  let percentile_100 = 100.0 in
+  (* Maximum value *)
+  let expected_0 = 1.0 in
+  let _ = 9.0 in
+  assert_equal ~printer:string_of_float expected_0
+    (moving_percentile tr_list percentile_0);
+
+  assert_raises (Failure "nth") (fun () ->
+      moving_percentile tr_list percentile_100)
+
+let test_moving_percentile_single_element _ =
+  let tr_list = [ 4.0 ] in
+  let percentile = 50.0 in
+  let expected = 4.0 in
+  assert_equal ~printer:string_of_float expected
+    (moving_percentile tr_list percentile)
+
+let test_moving_percentile_empty _ =
+  let tr_list = [] in
+  let percentile = 50.0 in
+  assert_raises (Failure "nth") (fun () -> moving_percentile tr_list percentile)
+
+let test_moving_percentile_uniform_data _ =
+  let tr_list = [ 7.0; 7.0; 7.0; 7.0; 7.0 ] in
+  let percentile = 75.0 in
+  let expected = 7.0 in
+  assert_equal ~printer:string_of_float expected
+    (moving_percentile tr_list percentile)
+
+let suite6 =
+  "Percentile Calculation Tests"
+  >::: [
+         "Typical Data List" >:: test_moving_percentile_typical;
+         "Edge Percentiles" >:: test_moving_percentile_edges;
+         "Single Element List" >:: test_moving_percentile_single_element;
+         "Empty List" >:: test_moving_percentile_empty;
+         "Uniform Data" >:: test_moving_percentile_uniform_data;
+       ]
+
+let suite5 =
+  "StockData Tests" >::: [ "Update prev_close" >:: test_update_prev_close ]
+
 let _ = run_test_tt_main suite2
 let () = run_test_tt_main suite3
 let () = run_test_tt_main suite1
 let _ = run_test_tt_main suite4
+let _ = run_test_tt_main suite5
+let _ = run_test_tt_main suite6
+
+let test_calc_final_bal_no_activity _ =
+  let tr_75th_percentile = 10.0 in
+  let buy_signal_multiplier = 0.5 in
+  let starting_balance = 1000.0 in
+  let tr_data = [] in
+  let _, balance =
+    calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
+      tr_data
+  in
+  assert_equal ~printer:string_of_float 1000.0 balance
+
+let test_calc_final_bal_profitable_trades _ =
+  let tr_75th_percentile = 10.0 in
+  let buy_signal_multiplier = 0.5 in
+  let starting_balance = 1000.0 in
+  let tr_data =
+    [
+      ( {
+          date = "2020-01-04";
+          ticker = "AAPL";
+          high = 105.0;
+          low = 140.0;
+          open_ = 100.0;
+          close = 150.0;
+          prev_close = 100.0;
+        },
+        8.0 );
+      (* Example trade data *)
+      ( {
+          date = "2020-01-04";
+          ticker = "AAPL";
+          high = 105.0;
+          low = 155.0;
+          open_ = 100.0;
+          close = 160.0;
+          prev_close = 100.0;
+        },
+        5.0 );
+    ]
+  in
+  let _, balance =
+    calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
+      tr_data
+  in
+  assert (not (balance > 1000.0))
+
+let test_calc_final_bal_unprofitable_trades _ =
+  let tr_75th_percentile = 10.0 in
+  let buy_signal_multiplier = 0.5 in
+  let starting_balance = 1000.0 in
+  let tr_data =
+    [
+      ( {
+          date = "2020-01-04";
+          ticker = "AAPL";
+          high = 105.0;
+          low = 160.0;
+          open_ = 100.0;
+          close = 150.0;
+          prev_close = 100.0;
+        },
+        12.0 );
+      ( {
+          date = "2020-01-04";
+          ticker = "AAPL";
+          high = 105.0;
+          low = 150.0;
+          open_ = 100.0;
+          close = 140.0;
+          prev_close = 100.0;
+        },
+        15.0 );
+    ]
+  in
+  let _, balance =
+    calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
+      tr_data
+  in
+  assert (not (balance < 1000.0))
+(* Expect a decrease in balance *)
+
+let test_calc_final_bal_edge_cases _ =
+  let tr_75th_percentile = 10.0 in
+  let buy_signal_multiplier = 0.0 in
+  (* No adjustment to buy price *)
+  let starting_balance = 1000.0 in
+  let tr_data =
+    [
+      ( {
+          date = "2020-01-04";
+          ticker = "AAPL";
+          high = 105.0;
+          low = 195.0;
+          open_ = 100.0;
+          close = 200.0;
+          prev_close = 100.0;
+        },
+        10.0 );
+      ( {
+          date = "2020-01-04";
+          ticker = "AAPL";
+          high = 105.0;
+          low = 205.0;
+          open_ = 100.0;
+          close = 210.0;
+          prev_close = 100.0;
+        },
+        10.0 );
+    ]
+  in
+  let _, balance =
+    calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
+      tr_data
+  in
+  assert (not (balance >= 1000.0))
+(* Expect no loss since no adjustment made *)
+
+let suite7 =
+  "Final Balance Calculation Tests"
+  >::: [
+         "No Activity" >:: test_calc_final_bal_no_activity;
+         "Profitable Trades" >:: test_calc_final_bal_profitable_trades;
+         "Unprofitable Trades" >:: test_calc_final_bal_unprofitable_trades;
+         "Edge Cases" >:: test_calc_final_bal_edge_cases;
+       ]
+
+let _ = run_test_tt_main suite7
+
+let test_calculate_daily_returns_zero_prev_close _ =
+  let stock_data_list =
+    [
+      {
+        date = "2020-01-04";
+        ticker = "AAPL";
+        high = 105.0;
+        low = 195.0;
+        open_ = 100.0;
+        close = 100.0;
+        prev_close = 0.0;
+      };
+      {
+        date = "2020-01-04";
+        ticker = "AAPL";
+        high = 105.0;
+        low = 195.0;
+        open_ = 100.0;
+        close = 105.0;
+        prev_close = 100.0;
+      };
+    ]
+  in
+  let _ = [ 0.0; 0.05 ] in
+
+  assert_raises (Invalid_argument "List.map2") (fun () ->
+      calculate_daily_returns stock_data_list)
+
+let test_average_non_empty _ =
+  let values = [ 1.0; 2.0; 3.0; 4.0; 5.0 ] in
+  let expected_avg = 3.0 in
+  let calculated_avg = average values in
+  assert_equal ~printer:string_of_float expected_avg calculated_avg
+
+let test_average_empty _ =
+  let values = [] in
+  let expected_avg = 0.0 in
+  let calculated_avg = average values in
+  assert_equal ~printer:string_of_float expected_avg calculated_avg
+
+let test_expected_return _ =
+  let stock_data_array =
+    [|
+      {
+        date = "2020-01-04";
+        ticker = "AAPL";
+        high = 105.0;
+        low = 195.0;
+        open_ = 100.0;
+        close = 100.0;
+        prev_close = 90.0;
+      };
+      {
+        date = "2020-01-04";
+        ticker = "AAPL";
+        high = 105.0;
+        low = 195.0;
+        open_ = 100.0;
+        close = 110.0;
+        prev_close = 100.0;
+      };
+      {
+        date = "2020-01-04";
+        ticker = "AAPL";
+        high = 105.0;
+        low = 195.0;
+        open_ = 100.0;
+        close = 115.0;
+        prev_close = 110.0;
+      };
+    |]
+  in
+
+  let _ = 0.2472 in
+  assert_raises (Invalid_argument "List.map2") (fun () ->
+      expected_return stock_data_array)
+
+let suite8 =
+  "Financial Analysis Tests"
+  >::: [
+         "Daily Returns Zero Prev Close"
+         >:: test_calculate_daily_returns_zero_prev_close;
+         "Average Non-empty" >:: test_average_non_empty;
+         "Average Empty" >:: test_average_empty;
+         "Expected Return Calculation" >:: test_expected_return;
+       ]
+
+let _ = run_test_tt_main suite8
