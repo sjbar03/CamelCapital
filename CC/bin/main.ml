@@ -26,23 +26,19 @@ let rec update_list lst prev_close =
       let updated_hd = StockData.update_prev_close hd prev_close in
       updated_hd :: update_list tl updated_hd.close
 
-let rec get_risk () =
-  let lines = File.lines_of "stock_data.csv" in
-  let data_lines = Enum.skip 1 lines in
-  let stock_data_list =
-    Enum.map StockData.parse_stock_data data_lines |> List.of_enum
-  in
-  let updated_stock_data = update_list stock_data_list 0.0 in
-  let stock_data_array = Array.of_list updated_stock_data in
-  let base_kelly = Garch.kelly_criterion stock_data_array in
-  Printf.printf "Base Kelly is %f" base_kelly;
-
+let request_risk () =
   ANSITerminal.printf [ Foreground Red ] "Please enter '1', '2', or '3': \n";
-  match read_int_opt () with
+  read_int_opt ()
+
+let rec get_risk risk_from_gui stock_data_list =
+  let stock_data_array = Array.of_list stock_data_list in
+  let base_kelly = Garch.kelly_criterion stock_data_array in
+  let risk = if risk_from_gui <> None then risk_from_gui else request_risk () in
+  match risk with
   | Some 1 -> log base_kelly
   | Some 2 -> base_kelly
   | Some 3 -> base_kelly *. base_kelly
-  | _ -> get_risk ()
+  | _ -> get_risk risk_from_gui stock_data_list
 
 (**new risk adjusted trading strategy*)
 let execute_trading_strategy tr_data buy_signal_multiplier starting_balance
@@ -60,19 +56,18 @@ let execute_trading_strategy tr_data buy_signal_multiplier starting_balance
   print_endline ("Starting balance: " ^ format_large_number starting_balance);
   print_endline ("Final balance: " ^ format_large_number final_balance)
 
-let trading_algorithm file_name starting_balance =
-  let adjusted_kelly = get_risk () in
-  Printf.printf "Adjusted Kelly : %f" adjusted_kelly;
+let trading_algorithm ?risk_from_gui file_name starting_balance =
   let lines = File.lines_of file_name in
   let data_lines = Enum.skip 1 lines in
   let stock_data_list =
     Enum.map StockData.parse_stock_data data_lines |> List.of_enum
   in
   let updated_list = update_list stock_data_list 0.0 in
+  let adjusted_kelly = get_risk risk_from_gui updated_list in
   let tr_data =
     List.map (fun sd -> (sd, StockData.true_range sd)) updated_list
   in
-  execute_trading_strategy tr_data 0.001 starting_balance adjusted_kelly
+  execute_trading_strategy tr_data 0.00001 starting_balance adjusted_kelly
 
 let download_data ticker =
   let command = Printf.sprintf "python download_data.py %s" ticker in
@@ -91,17 +86,25 @@ let rec get_valid_int _ =
   let input = read_int_opt () in
   if input != None then Option.get input else get_valid_int ()
 
+let rec get_valid_ticker () =
+  let ticker = read_line () in
+  try download_data ticker
+  with Failure _ ->
+    Printf.eprintf "Failed to download %s. Please enter another ticker." ticker;
+    get_valid_ticker ()
+
 let start_ui _ =
   ANSITerminal.printf [ Bold; Foreground Green ] "%s"
     "Welcome to Camel Capital! \n";
+  ANSITerminal.printf [ Bold; Foreground Blue ]
+    "Which stock would you like to trade? Enter a ticker:";
+  get_valid_ticker ();
   Printf.printf "%s" "  To begin, first enter your desired starting capital: \n";
   let capital = get_valid_int () in
   Printf.printf
-    " Next, enter either 1, 2, or 3 to select your risk profile. A higher \
-     number (I.E. 3) carries a higer risk factor. \n";
-  let risk = get_risk () in
-  Printf.printf "The starting capital and risk are as follows: %f / %f\n"
-    (float_of_int capital) risk
+    " Next, enter either 1, 2, or 3 to select your risk profile. A lower \
+     number (I.E. 1) carries a higer risk factor. \n";
+  trading_algorithm "stock_data.csv" (float_of_int capital)
 
 (* GUI *)
 
@@ -120,11 +123,15 @@ let button =
   Bogue.Widget.button "GO"
     ?bg_on:Bogue.Style.(Some (color_bg Bogue.Draw.(opaque green)))
 
+let risk_input =
+  Bogue.Widget.text_input ~prompt:"Please enter your risk, 1, 2, or 3" ()
+
 let prompt_box =
   Bogue.Layout.(
     flat ~align:Bogue.Draw.Center ~scale_content:true
       [
         interface_box;
+        Bogue.Layout.resident risk_input;
         Bogue.Layout.resident button;
         Bogue.Layout.resident final_balance_label;
       ])
@@ -164,17 +171,27 @@ let chart_layout = Bogue.Layout.flat ~name:"Charts" [ bal_chart; val_chart ]
 let main_layout =
   Bogue.Layout.tower ~name:"CamelCapital" [ prompt_box; chart_layout ]
 
+let get_coordinates data tick_spacing range height =
+  Array.mapi
+    (fun i d ->
+      let x = tick_spacing * i in
+      let y = StockData.gen_y_coord_from_range range d height in
+      (x, y))
+    data
+
 let draw_graph chart graphic color data =
   Bogue.Sdl_area.clear graphic;
   let width = fst (Bogue.Layout.get_physical_size chart) in
   let tick_spacing = width / Array.length data in
   let range = StockData.arr_range data in
-  for i = 0 to Array.length data - 1 do
-    let curr_val = data.(i) in
-    Bogue.Sdl_area.draw_circle graphic ~color ~thick:5 ~radius:5
-      ( tick_spacing * i,
-        StockData.gen_y_coord_from_range range curr_val
-          (snd (Bogue.Layout.get_physical_size chart)) )
+  let height = snd (Bogue.Layout.get_physical_size chart) in
+  let coordinates = get_coordinates data tick_spacing range height in
+  for i = 0 to Array.length coordinates - 1 do
+    Bogue.Sdl_area.draw_circle graphic ~color ~thick:5 ~radius:5 coordinates.(i);
+    if i <> 0 then
+      Bogue.Sdl_area.draw_line graphic ~color ~thick:1
+        coordinates.(i - 1)
+        coordinates.(i)
   done;
   Bogue.Sdl_area.update graphic
 
@@ -193,16 +210,18 @@ let parse_input enter_balance =
     (Bogue.Text_input.text (Bogue.Widget.get_text_input enter_balance))
     ~by:" "
 
-let run_algoritm_from_gui ticker bal =
+let run_algoritm_from_gui risk ticker bal =
   download_data ticker;
   let csv_file = "stock_data.csv" in
-  trading_algorithm csv_file bal
+  trading_algorithm ~risk_from_gui:risk csv_file bal
 
 let update_info_display starting_bal =
   let msg =
     Printf.sprintf "Starting Balance: %s \nFinal Balance %s"
       (format_large_number starting_bal)
-      (format_large_number StockData.last_1000_day_bal.(999))
+      (format_large_number
+         StockData.last_1000_day_bal.(Array.length StockData.last_1000_day_bal
+                                      - 1))
   in
   Bogue.Widget.set_text final_balance_label msg
 
@@ -211,12 +230,16 @@ let submit_balance button enter_balance ev =
   else if Bogue.Button.is_pressed (Bogue.Widget.get_button button) then
     try
       let input = parse_input enter_balance in
-      let bal = float_of_string (snd input) in
-      let ticker = fst input in
-      run_algoritm_from_gui ticker bal;
-      draw_all_graphs ();
-      update_info_display bal;
-      Bogue.Bogue.refresh_custom_windows board
+      let risk = int_of_string (Bogue.Widget.get_text risk_input) in
+      Printf.printf "Input risk is %i" risk;
+      if risk <> 1 && risk <> 2 && risk <> 3 then raise Exit
+      else
+        let bal = float_of_string (snd input) in
+        let ticker = fst input in
+        run_algoritm_from_gui risk ticker bal;
+        draw_all_graphs ();
+        update_info_display bal;
+        Bogue.Bogue.refresh_custom_windows board
     with _ -> ()
 
 let balance_button_connection =

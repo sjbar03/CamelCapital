@@ -8,7 +8,7 @@ type t = {
   prev_close : float;
 }
 
-let last_1000_day_bal = Array.make 1000 0.0
+let last_1000_day_bal = Array.make 70 0.0
 let last_1000_day_val = Array.make 1000 0.0
 
 let shift_in arr value =
@@ -55,11 +55,12 @@ let determine_buy_sell tr_75th_percentile buy_signal_multiplier
   let buy_price =
     stock.close -. (tr_75th_percentile *. buy_signal_multiplier)
   in
-  Printf.printf "Stock low: %f buy price : %f\n" stock.low buy_price;
-  if stock.low <= buy_price && prev_close < buy_price then
+  if stock.low <= buy_price && prev_close < buy_price then (
     let shares_to_buy = balance *. 0.15 /. buy_price in
     let bal = balance -. (shares_to_buy *. buy_price) in
-    (stock.close, bal, shares_bought +. shares_to_buy)
+    shift_in last_1000_day_bal bal;
+    shift_in last_1000_day_val stock.open_;
+    (stock.close, bal, shares_bought +. shares_to_buy))
   else
     let bal = balance +. (shares_bought *. stock.open_) in
     shift_in last_1000_day_bal bal;
@@ -97,7 +98,6 @@ let average lst =
 
 let expected_return data =
   let daily_returns = calculate_daily_returns (Array.to_list data) in
-  Printf.printf "Average daily returns : %f" (average daily_returns);
   average daily_returns
 
 let calculate_buy_price sd tr_75th_percentile buy_signal_multiplier =
