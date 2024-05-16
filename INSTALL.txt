@@ -44,16 +44,28 @@ For Backtesting:
   To launch 10-year backtest tool (with gui):
 
   $ dune exec bin/main.exe -- gui
-
+  
+  Once the GUI opens, in the top left you can enter in a ticker and starting balance where it says "Enter starting balance"
+  ie: AAPL 100000
+      GME 200000
+      
+  Next to "Enter starting balance," there's also an option to designate your risk level as 1, 2, or 3.
+  
 
   To run a 10-year backtest on a single ticker (no gui):
 
   $ dune exec bin/main.exe terminal
-
+  
+  For an example, you can try using AAPL as your ticker. 100000 as your desired starting capital, and 3 as your risk.
+  
+  
   
   If you don't want any interface, you may use only command line flags with
 
   $ dune exec bin/main.exe -- ticker <ticker_code> <starting_balance>
+  
+  ie: $ dune exec bin/main.exe -- ticker AMC 10000
+      You will later be prompted for your risk level, try using "2"
 
 For Paper Trading:
 
@@ -61,12 +73,17 @@ For Paper Trading:
 
   $ dune exec bin/realtime.exe -- -realtime gui
 
-    - Once in the paper trading GUI, enter a ticker and a press go. To update the visuals, press refresh.
+    - Once in the paper trading GUI, enter a ticker (ex. AAPL) in the top left and a press start. You won't see anything at the beginning, but after a few seconds, press refresh, and it should update.
+    - The program continuously checks the price of a stock until it is under "True Range." Once it's under True Range, it stops the program (to purchase the stock).
 
 
   To start trading loop without GUI:
 
   $ dune exec bin/realtime.exe -- <ticker> -realtime
+  
+  ie. dune exec bin/realtime.exe -- AAPL -realtime
+  
+  Feel free to modify the starting balance in trader_state.txt 
 
 
 
