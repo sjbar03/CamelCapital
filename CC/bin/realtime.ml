@@ -261,10 +261,16 @@ let reset_gui () =
   Bogue.Widget.(
     set_text ticker_label (ticker_msg "TICK");
     set_text tr_label (tr_msg 0.0);
-    set_text status_label (status_msg false))
+    set_text status_label (status_msg false));
+  Bogue.Sdl_area.clear chart_graphic;
+  for i = 0 to Array.length last_15_points - 1 do
+    last_15_points.(i) <- 0.0
+  done
 
 let gui_start_trading button ticker_input ev =
   if Bogue.Button.is_pressed (Bogue.Widget.get_button button) then (
+    reset_gui ();
+    global_bought := false;
     let ticker = Bogue.Widget.get_text ticker_input in
     try
       while not !global_bought do
