@@ -1,3 +1,45 @@
+commit de31a9c63c281c0329f34812c0efa5dd204d5b37
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Thu May 16 11:27:59 2024 -0400
+
+    Clean up
+    - Add TestingPlan.pdf
+    - Remove trading bot
+    - remove A3 skeleton
+
+commit 22fb1eaca85d0880cea66f37e363894f81597f22
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Thu May 16 10:53:55 2024 -0400
+
+    Fix trader_state.txt
+    - Previous change corrupted it and bricked program
+
+commit 3954a163b3702b96051b7441339d3ca301c27fe6
+Merge: 33cb729 2eab977
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Thu May 16 10:50:53 2024 -0400
+
+    Make realtime gui more stable.
+
+commit 33cb7299fefc082d53caf2fbb92b2d353d54c2c9
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Thu May 16 10:44:59 2024 -0400
+
+    Make realtime GUI more stable
+    - Allow the user to restart the trading after the bot buys (instead of having to restart the application)
+
+commit 2eab977dba167751e90802bf7481a1502c677243
+Author: ar986 <ar986@cornell.edu>
+Date:   Thu May 16 09:13:40 2024 -0400
+
+    removed old gitlog
+
+commit f24bcce6c169b776ea4e9f6dc79194dad293448f
+Author: Amaan Rehan <ar986@cornell.edu>
+Date:   Thu May 16 09:13:09 2024 -0400
+
+    gitlog
+
 commit 21938c30723d8149875fdeba163e0c6fd55c153d
 Author: ar986 <ar986@cornell.edu>
 Date:   Thu May 16 09:07:03 2024 -0400
