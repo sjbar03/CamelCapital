@@ -1,0 +1,539 @@
+commit 21938c30723d8149875fdeba163e0c6fd55c153d
+Author: ar986 <ar986@cornell.edu>
+Date:   Thu May 16 09:07:03 2024 -0400
+
+    Update INSTALL.txt
+
+commit 069143ca5a99f7a6c50e0cf9cba634e7dd4e6145
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Thu May 16 01:40:02 2024 -0400
+
+    Repair test suite
+    - Refactor test cases for previously incorrect functions
+
+commit 5fcb43a8949086aa3c229d3f0d8c018bf151f371
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Thu May 16 01:02:15 2024 -0400
+
+    Add to INSTALL.txt
+    - Add usage instructions
+
+commit 3e29bed39e0fef69ad1da3320a15e9a0c9d40ccb
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Thu May 16 00:43:04 2024 -0400
+
+    Fix Bugs, Finish GUI
+    - Balance buy_signal_multiplier
+    - Add lines to graph
+    - Add terminal compatibility with risk trading
+    - Add GUI compatibility with risk trading
+    - Increase Profit!
+
+commit c69b819a68bf710924ea10393d079dc081013193
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed May 15 23:08:53 2024 -0400
+
+    Fixed risk adjustment bugs
+    - Adjusted buy signal multiplier
+    - Fixed stock data parsing (update prev_close)
+    - Fix List.map2 error
+
+commit 6e094e816eea533860f6057663a7b468d42a55f2
+Merge: 7ef44e3 317546a
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed May 15 21:01:51 2024 -0400
+
+    Merge branch 'main' of github.coecis.cornell.edu:sjb336/CamelCapital
+    
+    Add usage text for realtime.
+
+commit 7ef44e3f283d6faf513eb5645511cd0c4c6e85ca
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed May 15 20:56:24 2024 -0400
+
+    Add Usage Text for Realtime
+    - add usage.txt
+    - modify realtime main ()
+
+commit 317546a4600660779b7e06411185ba7882a33c20
+Author: carsonwolber <ctw54@cornell.edu>
+Date:   Wed May 15 20:49:45 2024 -0400
+
+    changed backtesting trading execution code to factor in risk
+
+commit 895a659be1e160ece99e3e9bbbc2f76fdc0b826a
+Author: ar986 <ar986@cornell.edu>
+Date:   Wed May 15 19:00:59 2024 -0400
+
+    Update YAML
+
+commit fd7204ac49c614006aed5850f9e4992382b7cdb8
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed May 15 18:00:10 2024 -0400
+
+    Add Test Cases to StockData
+    - Test Utility Functions
+            - Array range
+            - Array shift
+            - Gen Y Coords
+    - Add documentation to StockData
+    - Add explanatory comments in realtime
+
+commit 43c4abcc6fa899ad2708c40be4b9f6ea58333851
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed May 15 16:39:11 2024 -0400
+
+    Polish live trading GUI.
+    - Add refresh button
+    - Add stock price
+    - Remove terminal
+    - Clean up chart display
+    - Fix most bugs
+
+commit d96f9cdde4cb3a3e2598eb07c8b3b740cbf2e795
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed May 15 04:18:19 2024 -0400
+
+    Start work on real-time GUI.
+    - Add all widgets
+    - Add chart
+    - KNOWN BUGS: Chart flickers, algorithm halts gui
+
+commit fb1fe4f234ea08659174e3d9b3e48cb1d03c274f
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed May 15 03:17:33 2024 -0400
+
+    Removes _coverage
+
+commit dfcce9c56760f4e01c196d52417f7d12bbb9be18
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed May 15 03:14:23 2024 -0400
+
+     Completes all test cases
+
+commit 2ec3656cc42f83dc2281fd11d4a830b576988f00
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed May 15 01:34:30 2024 -0400
+
+    Adds 4 more tests for each function in stockdata
+
+commit 875ee5a97864ffb5d07b97bc01f3a8a3b95728f8
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed May 15 01:07:56 2024 -0400
+
+    Adds 4 more tests for each function in garch.ml
+
+commit a6810d06c715ae5309d768a61e5c345a924c080b
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed May 15 00:00:32 2024 -0400
+
+    Moves test cases of garch to test_garch.ml
+
+commit d906b10c9c0a1b893d9a63f25290b95aed35b29f
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Tue May 14 23:58:44 2024 -0400
+
+    Implements test cases in test_garch.ml for garch.ml
+
+commit cfe6977c3e5277ec67fa7d638c6e4ecab9f7d211
+Author: Amaan Rehan <ar986@cornell.edu>
+Date:   Tue May 14 20:51:30 2024 -0400
+
+    add skeleton code for test suite
+
+commit 877080b7a719e58b03f5c776ebdc507d164715dd
+Author: Amaan Rehan <ar986@cornell.edu>
+Date:   Tue May 14 20:40:58 2024 -0400
+
+    fixed compilation errors
+
+commit b02055974d47f8315384ea2804d3ba2ff9c35d7e
+Merge: eea3b36 e963374
+Author: Amaan Rehan <ar986@cornell.edu>
+Date:   Tue May 14 20:31:41 2024 -0400
+
+    Added realtime trading
+
+commit eea3b360fda3aecc378eeddf73b120ed88e2c9f6
+Author: Amaan Rehan <ar986@cornell.edu>
+Date:   Tue May 14 20:28:01 2024 -0400
+
+    Added Realtime Trading
+    
+    ex: dune exec -- realtime_exe AAPL --realtime
+
+commit e963374577cce41f4d2857d73bda6fee9f36d31f
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Tue May 14 19:06:07 2024 -0400
+
+    More GUI Tweaks
+    - Display starting and ending Balance
+    - More bug fixes
+
+commit 885808b625c9b79535905373b86171eca572c8d0
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Tue May 14 15:37:16 2024 -0400
+
+    Add GUI features
+    - Add stock price chart
+    - Fix chart scaling issues
+    - Clean up GUI code
+    - Fix various other bugs
+
+commit 7f07e081cd2674d8741197a454e41097c1a55d83
+Author: Amaan Rehan <ar986@cornell.edu>
+Date:   Mon May 13 14:36:22 2024 -0400
+
+    fixed compilation error
+
+commit 9630cb97fdb87c8387498c2fd6ed00f41404cb32
+Author: carsonwolber <ctw54@cornell.edu>
+Date:   Mon May 13 04:30:07 2024 -0400
+
+    fleshed out the risk component in main, including kelly criterion and new functions in all modules
+
+commit 09028ab6dfac1419af3d7f44399a8d6efcb39b9b
+Author: carsonwolber <ctw54@cornell.edu>
+Date:   Mon May 13 03:40:37 2024 -0400
+
+    adjusted variance function finishing garch module
+
+commit ca66c75443300cce054b698ff46405621d7f0150
+Author: carsonwolber <ctw54@cornell.edu>
+Date:   Sun May 12 21:53:25 2024 -0400
+
+    added garch module
+
+commit 547d9096390a910991576d3b0768285d9471f78a
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed May 1 01:55:38 2024 -0400
+
+    Add back files
+
+commit 86ebb689fff6d033282a2ecdf08ca77f3d49882c
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Tue Apr 30 23:48:58 2024 -0400
+
+    Begin implementing GUI.
+    - Requires Bogue is installed
+    - Launch interactive window when launched with flag 'gui'
+    - Allow multiple runs of the program during same execution
+    - Display the last 1000 days of data on a graph
+
+commit f222b0fa9a58a0ec1523e11fc0cb42d1e8ec52c2
+Author: ar986 <ar986@cornell.edu>
+Date:   Fri Apr 26 09:42:50 2024 -0400
+
+    spelling error fix
+
+commit ec3eec067b397426855e0b9c9fae99c955491b91
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Fri Apr 26 03:39:59 2024 -0400
+
+    Add basic user interface.
+    - When program is ran with one flag -> risk : the user interface will start
+    - Requests for user to input starting capital then risk tolerance
+    - Does NOT start trading algorithm yet
+
+commit 21970d42cf951118cf27147209e4c008e115d26f
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Thu Apr 18 19:55:55 2024 -0400
+
+    Adds Cli command to help on usage of the app
+
+commit 43e55e0ad7deb9bc37458e36f57453a85787e94a
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Thu Mar 28 17:00:13 2024 -0400
+
+    Completes yaml file
+
+commit b4abafb74dfc1df4be8ad55112759afc4e1e11fd
+Author: ctw54 <ctw54@cornell.edu>
+Date:   Thu Mar 28 16:46:28 2024 -0400
+
+    carson YAML
+
+commit ac0718a5c102421da7d7cf044da9c1b241255236
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Thu Mar 28 09:56:49 2024 -0400
+
+    Add Stephen Barlett to YAML.
+
+commit 284a6e92a7302976ecc9ed2e5f26bd259c03e10b
+Author: ar986 <ar986@cornell.edu>
+Date:   Thu Mar 28 08:52:41 2024 -0400
+
+    Update YAML
+
+commit 37714d90cdfee2d594264ed1106f68e675f98aae
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed Mar 27 21:49:45 2024 -0400
+
+    Adds YAML file to the root
+
+commit c0dc4226b64338096d545500c15d6339eb30b774
+Author: Amaan Rehan <ar986@cornell.edu>
+Date:   Wed Mar 27 17:09:09 2024 -0400
+
+    Added INSTALL.txt and gitlog (as of 3/27 5:00 PM)
+
+commit be1c52a8a4424bfde470011512a68385171fa6c2
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 27 12:03:46 2024 -0400
+
+    Add specification for printing functions.
+
+commit 32b33326a0b415cc63773805adb4e6bd34417426
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 27 11:59:54 2024 -0400
+
+    Make output prettier.
+    - insert commas in large numbers.
+    - add dollar sign before financial values
+
+commit a4b52853782326b77ebb51fa2f1e7321442ee3d4
+Author: Amaan Rehan <ar986@cornell.edu>
+Date:   Wed Mar 27 10:40:50 2024 -0400
+
+    Sells stocks at opening price if bought
+
+commit 3439e212a9900efc76c8c7a89099b526b8a21e0d
+Merge: 5035035 61e0f89
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Tue Mar 26 19:15:06 2024 -0400
+
+    Finish transition to modular CC directory.
+    - Clean up code
+    - Completed StockData compilation unit
+    - Completed main stock buying bot
+    - Add specification and comments
+
+commit 5035035d239eaf6117da89e5aae9fc10359c3c6a
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Tue Mar 26 19:10:56 2024 -0400
+
+    Complete transition to modular CC directory.
+    - Completed stock_data compilation unit
+    - Completed main stock buying bot
+    - Add specifications and comments
+
+commit 61e0f894678c3bef29896c98c1c27078e1053fdd
+Merge: 17356cd daa2502
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Tue Mar 26 13:10:31 2024 -0400
+
+    Merge remote-tracking branch 'refs/remotes/origin/main'
+
+commit 17356cd95c8eabc1ce224cf28746de3034a3c2a5
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Tue Mar 26 13:08:59 2024 -0400
+
+    To pull
+
+commit daa2502405833122b8e4e9f63d2693e17dd73ac5
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Tue Mar 26 11:39:19 2024 -0400
+
+    Remove A3 Code. Start putting trading bot into modular form.
+    - Delete Table.ml / mli
+    - Delete Column.ml / mli
+    - Add StockData.ml
+
+commit 0f8964b2a9747816d53ce8e7032aa10128c62fc6
+Author: ar986 <ar986@cornell.edu>
+Date:   Mon Mar 25 10:26:02 2024 -0400
+
+    Allows user to input start money and the company
+    
+    The program now accepts 4 inputs
+    
+    1) Running the Algorithm on an Existing CSV File Without Specifying Starting Balance (Default is $100000)
+    dune exec bin/main.exe -- csv apple_stock_data.csv
+    
+    2) Running the Algorithm on an Existing CSV File With Specified Starting Balance
+    dune exec bin/main.exe -- csv apple_stock_data.csv 200000
+    
+    3) Downloading Stock Data for a Given Ticker and Running the Algorithm Without Specifying Starting Balance
+    dune exec bin/main.exe -- ticker NVDA
+    
+    4) Downloading Stock Data for a Given Ticker and Running the Algorithm With Specified Starting Balance
+    dune exec bin/main.exe -- ticker NVDA 200000
+
+commit 507f83d21ce9d7b710b87f714dea132482159fd6
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Fri Mar 22 16:48:05 2024 -0400
+
+    Fixed
+
+commit 5467b2ce469eb0b9cd71259054cb9548a687ac3f
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Fri Mar 22 16:44:00 2024 -0400
+
+    Debloat Table and Set.
+    - Removed map functions
+    - Removed Reduce functions
+    - Removed unnecessary and unused functions
+
+commit 6549ac31069586bea271ea9f19f84c114e12481f
+Author: ar986 <ar986@cornell.edu>
+Date:   Fri Mar 22 15:16:02 2024 -0400
+
+    Demo Trading Algorithm
+    
+    Is able to apply the trading algorithm on 1 stock at a time, making buying decisions solely on closing price.
+
+commit 937df5e521e34528739ffeb7ea7ee4d9dcbc916c
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 20 17:04:11 2024 -0400
+
+    Removed "-" folder.
+
+commit 7a8662253a7d97aae28ae230d95854810a439847
+Merge: 766110b 273cb06
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 20 17:02:07 2024 -0400
+
+    Modify gitignore
+
+commit 766110bcbe544a9ee8665fe7edde83268051eb3e
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 20 16:52:44 2024 -0400
+
+    Modify gitignore
+    - ignore _build
+    - ignore _opam
+    - Changed dune project name from CamelCapital to CC
+
+commit b25c4c7796f74fb7dc8a7bb752fb94e6838a940c
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 20 16:51:15 2024 -0400
+
+    Modify gitignore
+    - ignore _build
+    - ignore _opam
+    - change dune project name from CamelCapital to CC to avoid redundancy.
+
+commit 273cb064833561b0ed1308b4d201bc793487c421
+Merge: 1f1040e 322914f
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed Mar 20 16:48:44 2024 -0400
+
+    Merge remote-tracking branch 'refs/remotes/origin/main'
+
+commit 1f1040e88002bcb3d1704b8b91c932d7d2248975
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed Mar 20 16:47:09 2024 -0400
+
+    Creates dune project
+
+commit 322914f9afc8d5f9501eb03dec579d18bcf4a938
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 20 16:43:01 2024 -0400
+
+    Modifies gitignore
+
+commit e6f60abd90ccdf22bb275fb8acba573d65fc0d44
+Merge: 6480bbf 76d3d82
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 20 16:40:23 2024 -0400
+
+    Merge remote-tracking branch 'refs/remotes/origin/main'
+
+commit 6480bbf0f78fc067684b209c0ce47282359ae5e8
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Wed Mar 20 16:39:23 2024 -0400
+
+    Adds my a3
+
+commit 76d3d824f6c00e38115e0224b025e47e03d95c9f
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed Mar 20 16:34:09 2024 -0400
+
+    Adds intraday_data.csv to project
+
+commit a9899535bff6915c80470b5e9e1c0ea28f3d3a34
+Merge: a0454d3 d51f223
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed Mar 20 16:23:47 2024 -0400
+
+    Merge remote-tracking branch 'refs/remotes/origin/main'
+
+commit a0454d3bda93bd943ca078e8aa3bde2261151a3c
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed Mar 20 16:22:31 2024 -0400
+
+    Adds Jephthah's a3 and a4 as prototypes
+
+commit d51f223a470a1f6d859829b303b8a0a8bd831530
+Author: ar986 <ar986@cornell.edu>
+Date:   Wed Mar 20 16:22:14 2024 -0400
+
+    Changed dates
+
+commit fbe6749bb2ab7b3665e0ed9385b6c17cc0427e1b
+Merge: 2028fd7 5757594
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed Mar 20 16:07:12 2024 -0400
+
+    Merge remote-tracking branch 'refs/remotes/origin/main'
+
+commit 2028fd7491ab88f0cc04ed254b7d7508e68827e6
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Wed Mar 20 16:07:01 2024 -0400
+
+    Adds main.ml(prototype for the interface) to the project
+
+commit 57575942ba28c7787bf2e24196173b1b26a074d4
+Author: Stephen Barlett <sjb336@cornell.edu>
+Date:   Fri Mar 8 17:09:09 2024 -0500
+
+    Add Stephen Barlett - sjb336 to readme.
+
+commit 7283a8309f5051860440a966cbdcf6321bb0c73e
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Fri Mar 8 16:38:24 2024 -0500
+
+    Removed csv and added gitignore
+
+commit d1a3d70109ee9d50b149521118103955891639d6
+Merge: b99c5aa cb892a9
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Fri Mar 8 16:34:45 2024 -0500
+
+    Merge remote-tracking branch 'refs/remotes/origin/main'
+
+commit b99c5aa7e98282d9f816e7b47ea36014d0c91537
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Fri Mar 8 16:33:35 2024 -0500
+
+    Added name to Readme
+
+commit cb892a9f08ff0ea2e31c31a6d955fc73a0bd1a96
+Author: ctw54 <ctw54@cornell.edu>
+Date:   Fri Mar 8 16:33:22 2024 -0500
+
+    Create README.md
+
+commit c518da973413980139f6a71746839c4ae15bab27
+Author: Jephthah Mensah <jkm255@cornell.edu>
+Date:   Fri Mar 8 16:32:45 2024 -0500
+
+    Added name to Readme
+
+commit a9fc106d32de12ba8600079571514ad411f90a60
+Author: ar986 <ar986@cornell.edu>
+Date:   Fri Mar 8 16:31:35 2024 -0500
+
+    Update README.md
+
+commit 0f6cc82635324b2a4bf6f1d338229d4d16edb04d
+Author: ar986 <ar986@cornell.edu>
+Date:   Fri Mar 8 16:30:21 2024 -0500
+
+    Create README.md
+
+commit bc3fa11b093b23790d28f49914a70be0fc9bb8ee
+Author: Carson Wolber <ctw54@cornell.edu>
+Date:   Fri Mar 8 16:24:27 2024 -0500
+
+    added python intraday api
