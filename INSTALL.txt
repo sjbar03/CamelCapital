@@ -14,12 +14,15 @@ If you do not have Homebrew, you can download Python on this website:
 https://www.python.org/downloads/
 
 
-The only external package needed for this project is Batteries. If you do not have Batteries installed, you can run these commands in a terminal.
+Several external packages are required to run this application. You can install all of them with opam:
 
+
+$ opam install batteries
+$ opam install bogue
+$ opam install gsl
+$ opam install ANSITerminal
 $ opam update
 $ opam upgrade
-$ opam install batteries
-
 
 Next, open up the CamelCapital folder with a command-line terminal. Once there, open the source code of the project with:
 

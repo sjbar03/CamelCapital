@@ -309,10 +309,14 @@ let no_gui_loop ticker =
     monitor_and_trade ticker
   done
 
+let read_usage () =
+  let lines = BatList.of_enum (BatFile.lines_of "usage.txt") in
+  List.fold (fun acc l -> Printf.sprintf "%s\n%s" acc l) "" lines
+
 let main_new () =
   match Array.to_list Sys.argv with
-  | [ _; ticker; "--realtime" ] -> no_gui_loop ticker
-  | [ _; "--realtime"; "gui" ] -> start_gui ()
+  | [ _; ticker; "-realtime" ] -> no_gui_loop ticker
+  | [ _; "-realtime"; "gui" ] -> start_gui ()
   | [ _; ticker; start_date; end_date ] ->
       let last_date, last_balance = read_last_state () in
       let file_name =
@@ -329,10 +333,9 @@ let main_new () =
       printf "Last trading session was on: %s with a balance of: $%.2f\n"
         last_date last_balance;
       printf "Current balance after trading: $%.2f\n" final_balance
-  | _ ->
-      eprintf
-        "Usage: %s <ticker> [--realtime | --gui <start_date> <end_date>]\n"
-        Sys.argv.(0)
+  | _ -> (
+      try Printf.eprintf "%s" (read_usage ())
+      with _ -> Printf.eprintf "Usage file missing.")
 
 let () =
   Sys.catch_break true;

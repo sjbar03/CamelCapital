@@ -1,0 +1,10 @@
+Usage:
+
+Run With GUI:
+dune exec bin/main.exe -- -realtime gui
+
+Run Without GUI:
+dune exec bin/main.exe -- <ticker> -realtime
+
+Run on Historic Data:
+dune exec bin/main.exe -- <ticker> <start_date> <end_date>
