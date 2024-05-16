@@ -552,8 +552,9 @@ let test_kelly_criterion_typical _ =
     |]
   in
   let _ = 0.25 (* example value based on expected calculation results *) in
+  let res = kelly_criterion data in
 
-  assert_raises (Invalid_argument "List.map2") (fun () -> kelly_criterion data)
+  assert (res > 1.0 && res < 1.5)
 
 let suite =
   "Kelly Criterion Tests"

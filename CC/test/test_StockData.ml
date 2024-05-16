@@ -482,7 +482,7 @@ let test_calc_final_bal_edge_cases _ =
           low = 195.0;
           open_ = 100.0;
           close = 200.0;
-          prev_close = 100.0;
+          prev_close = 203.0;
         },
         10.0 );
       ( {
@@ -501,7 +501,7 @@ let test_calc_final_bal_edge_cases _ =
     calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
       tr_data
   in
-  assert (not (balance >= 1000.0))
+  assert (balance >= 1000.0)
 (* Expect no loss since no adjustment made *)
 
 let suite7 =
@@ -539,9 +539,8 @@ let test_calculate_daily_returns_zero_prev_close _ =
     ]
   in
   let _ = [ 0.0; 0.05 ] in
-
-  assert_raises (Invalid_argument "List.map2") (fun () ->
-      calculate_daily_returns stock_data_list)
+  let res = calculate_daily_returns stock_data_list in
+  assert (List.hd res = 0.0)
 
 let test_average_non_empty _ =
   let values = [ 1.0; 2.0; 3.0; 4.0; 5.0 ] in
@@ -588,9 +587,9 @@ let test_expected_return _ =
     |]
   in
 
-  let _ = 0.2472 in
-  assert_raises (Invalid_argument "List.map2") (fun () ->
-      expected_return stock_data_array)
+  let expected = 186. in
+  let res = Float.round (1000. *. expected_return stock_data_array) in
+  assert (res = expected)
 
 let suite8 =
   "Financial Analysis Tests"
