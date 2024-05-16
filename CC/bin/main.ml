@@ -126,12 +126,15 @@ let button =
 let risk_input =
   Bogue.Widget.text_input ~prompt:"Please enter your risk, 1, 2, or 3" ()
 
+let risk_label = Bogue.Widget.label "Enter 1, 2, or 3."
+let risk_and_caption = Bogue.Layout.(tower_of_w [ risk_input; risk_label ])
+
 let prompt_box =
   Bogue.Layout.(
     flat ~align:Bogue.Draw.Center ~scale_content:true
       [
         interface_box;
-        Bogue.Layout.resident risk_input;
+        risk_and_caption;
         Bogue.Layout.resident button;
         Bogue.Layout.resident final_balance_label;
       ])
@@ -257,7 +260,7 @@ let () =
   (* Default starting balance *)
   let argv = Array.to_list Sys.argv in
   match argv with
-  | [ _; "risk" ] -> start_ui ()
+  | [ _; "terminal" ] -> start_ui ()
   | _ :: "csv" :: file_name :: balance_arg ->
       trading_algorithm file_name
         (starting_balance balance_arg default_starting_balance)

@@ -37,15 +37,37 @@ If you get an error, try running:
 $ dune clean
 $ dune build
 
-Here are some commands to run:
+Example Usage:
 
-$ dune exec bin/main.exe -- ticker AMZN
+For Backtesting: 
 
-$ dune exec bin/main.exe -- ticker NVDA 200000
+  To launch 10-year backtest tool (with gui):
 
-Here's a really interesting one:
-
-$ dune exec bin/main.exe -- ticker GME
+  $ dune exec bin/main.exe -- gui
 
 
-At a high level, these command line instructions run a 10 year backtest on given stocks using our trading algorithm.
+  To run a 10-year backtest on a single ticker (no gui):
+
+  $ dune exec bin/main.exe terminal
+
+  
+  If you don't want any interface, you may use only command line flags with
+
+  $ dune exec bin/main.exe -- ticker <ticker_code> <starting_balance>
+
+For Paper Trading:
+
+  To launch GUI:
+
+  $ dune exec bin/realtime.exe -- -realtime gui
+
+    - Once in the paper trading GUI, enter a ticker and a press go. To update the visuals, press refresh.
+
+
+  To start trading loop without GUI:
+
+  $ dune exec bin/realtime.exe -- <ticker> -realtime
+
+
+
+

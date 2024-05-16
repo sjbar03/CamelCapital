@@ -8,7 +8,7 @@ type t = {
   prev_close : float;
 }
 
-let last_1000_day_bal = Array.make 70 0.0
+let last_1000_day_bal = Array.make 1000 0.0
 let last_1000_day_val = Array.make 1000 0.0
 
 let shift_in arr value =
