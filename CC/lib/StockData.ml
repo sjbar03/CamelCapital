@@ -55,6 +55,7 @@ let determine_buy_sell tr_75th_percentile buy_signal_multiplier
   let buy_price =
     stock.close -. (tr_75th_percentile *. buy_signal_multiplier)
   in
+  Printf.printf "Stock low: %f buy price : %f\n" stock.low buy_price;
   if stock.low <= buy_price && prev_close < buy_price then
     let shares_to_buy = balance *. 0.15 /. buy_price in
     let bal = balance -. (shares_to_buy *. buy_price) in
@@ -71,7 +72,13 @@ let calc_final_bal tr_75th_percentile buy_signal_multiplier starting_balance
     (determine_buy_sell tr_75th_percentile buy_signal_multiplier)
     (0.0, starting_balance, 0.0)
     tr_data
-  |> fun (_, balance, _) -> (0.0, balance)
+  |> fun (_, balance, _) -> (balance, starting_balance)
+
+let rec hd_list lst acc =
+  match lst with
+  | _ :: [] -> List.rev acc
+  | h :: t -> hd_list t (h :: acc)
+  | [] -> failwith "Hd_list called on empty list"
 
 let calculate_daily_returns stock_data_list =
   List.map2
@@ -79,7 +86,8 @@ let calculate_daily_returns stock_data_list =
       if sd1.prev_close <> 0.0 then
         (sd2.close -. sd1.prev_close) /. sd1.prev_close
       else 0.0)
-    stock_data_list (List.tl stock_data_list)
+    (hd_list stock_data_list [])
+    (List.tl stock_data_list)
 
 let average lst =
   let sum, count =
@@ -89,6 +97,7 @@ let average lst =
 
 let expected_return data =
   let daily_returns = calculate_daily_returns (Array.to_list data) in
+  Printf.printf "Average daily returns : %f" (average daily_returns);
   average daily_returns
 
 let calculate_buy_price sd tr_75th_percentile buy_signal_multiplier =
