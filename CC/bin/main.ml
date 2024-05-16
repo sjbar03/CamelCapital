@@ -19,40 +19,51 @@ let format_large_number f =
   let lst = String.to_list d in
   "$" ^ String.of_list (List.rev (insert_char (List.rev lst) ',' 0))
 
-let execute_trading_strategy tr_data percentile_threshold buy_signal_multiplier
-    starting_balance =
-  let tr_75th_percentile =
-    StockData.moving_percentile (List.map snd tr_data) percentile_threshold
-  in
-  let final_balance =
-    StockData.calc_final_bal tr_75th_percentile buy_signal_multiplier
-      starting_balance tr_data
-  in
-  print_endline ("Starting balance: " ^ format_large_number starting_balance);
-  print_endline ("Final balance: " ^ format_large_number (snd final_balance))
-
-let rec update_list lst prev_close =
-  match lst with
-  | [] -> []
-  | hd :: tl ->
-      let updated_hd = StockData.update_prev_close hd prev_close in
-      updated_hd :: update_list tl updated_hd.close
-
-let trading_algorithm file_name =
-  let lines = File.lines_of file_name in
-  (* Skip the first line which contains the headers *)
+let rec get_risk () =
+  let lines = File.lines_of "stock_data.csv" in
   let data_lines = Enum.skip 1 lines in
   let stock_data_list =
     Enum.map StockData.parse_stock_data data_lines |> List.of_enum
   in
-  let updated_stock_data_list =
-    (* Assume this list is sorted by date for each ticker *)
-    update_list stock_data_list 0.0
+  let stock_data_array = Array.of_list stock_data_list in
+  let base_kelly = Garch.kelly_criterion stock_data_array in
+
+  ANSITerminal.printf [ Foreground Red ] "Please enter '1', '2', or '3': \n";
+  match read_int_opt () with
+  | Some 1 -> log base_kelly
+  | Some 2 -> base_kelly
+  | Some 3 -> base_kelly *. base_kelly
+  | _ -> get_risk ()
+
+(**new risk adjusted trading strategy*)
+let execute_trading_strategy tr_data buy_signal_multiplier starting_balance risk_adjustment =
+  let tr_75th_percentile = StockData.moving_percentile (List.map snd tr_data) 75.0 in
+  let adjusted_buy_signal_multiplier = buy_signal_multiplier *. risk_adjustment in
+  let final_balance, _other_value = StockData.calc_final_bal tr_75th_percentile adjusted_buy_signal_multiplier
+                        starting_balance tr_data in
+  print_endline ("Starting balance: " ^ format_large_number starting_balance);
+  print_endline ("Final balance: " ^ format_large_number final_balance)
+
+let trading_algorithm file_name starting_balance =
+  let adjusted_kelly = get_risk ()
+  in
+  let lines = File.lines_of file_name in 
+  let data_lines = Enum.skip 1 lines in 
+  let stock_data_list =
+    Enum.map StockData.parse_stock_data data_lines |> List.of_enum  
   in
   let tr_data =
-    List.map (fun sd -> (sd, StockData.true_range sd)) updated_stock_data_list
+    List.map (fun sd -> (sd, StockData.true_range sd)) stock_data_list  
   in
-  execute_trading_strategy tr_data 75. 0.7
+  execute_trading_strategy tr_data 0.7 starting_balance adjusted_kelly 
+
+
+(* let rec update_list lst prev_close =
+  match lst with
+  | [] -> []
+  | hd :: tl ->
+      let updated_hd = StockData.update_prev_close hd prev_close in
+      updated_hd :: update_list tl updated_hd.close   *)
 
 let download_data ticker =
   let command = Printf.sprintf "python download_data.py %s" ticker in
@@ -70,22 +81,6 @@ let rec get_valid_int _ =
   ANSITerminal.printf [ Foreground Red ] "%s" "Please enter an integer: \n";
   let input = read_int_opt () in
   if input != None then Option.get input else get_valid_int ()
-
-let rec get_risk () =
-  let lines = File.lines_of "stock_data.csv" in
-  let data_lines = Enum.skip 1 lines in
-  let stock_data_list =
-    Enum.map StockData.parse_stock_data data_lines |> List.of_enum
-  in
-  let stock_data_array = Array.of_list stock_data_list in
-  let base_kelly = Garch.kelly_criterion stock_data_array in
-
-  ANSITerminal.printf [ Foreground Red ] "Please enter '1', '2', or '3': \n";
-  match read_int_opt () with
-  | Some 1 -> log base_kelly
-  | Some 2 -> base_kelly
-  | Some 3 -> base_kelly *. base_kelly
-  | _ -> get_risk ()
 
 let start_ui _ =
   ANSITerminal.printf [ Bold; Foreground Green ] "%s"
@@ -246,3 +241,4 @@ let () =
       Printf.eprintf
         "Usage: %s <csv|ticker> <file_path|ticker_symbol> [starting_balance]\n"
         (List.hd argv)
+
