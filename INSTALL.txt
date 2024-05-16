@@ -21,6 +21,7 @@ $ opam install batteries
 $ opam install bogue
 $ opam install gsl
 $ opam install ANSITerminal
+$ opam install bisect_ppx
 $ opam update
 $ opam upgrade
 
